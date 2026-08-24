@@ -3,71 +3,225 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>TelemetryAudit — Stop overpaying Datadog</title>
+<title>Winnow — Stop overpaying Datadog</title>
+<meta name="description" content="Winnow finds the money hiding in your Datadog bill. Free read-only audit, metadata-only, dollar figures per finding."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
-  :root{--bg:#0b1020;--card:#121a33;--line:#22305c;--txt:#e5ecff;--dim:#93a4cc;--accent:#34d399}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--txt);font:16px/1.6 -apple-system,'Segoe UI',Roboto,sans-serif}
-  a{color:#60a5fa;text-decoration:none}
-  nav{display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;border-bottom:1px solid var(--line)}
-  .logo{font-weight:800;font-size:18px}.logo b{color:var(--accent)}
-  .btn{display:inline-block;background:var(--accent);color:#04120c!important;font-weight:700;padding:12px 22px;border-radius:10px;border:none;cursor:pointer;font-size:15px}
-  .btn.ghost{background:transparent;color:var(--txt)!important;border:1px solid var(--line)}
-  section{max-width:1000px;margin:0 auto;padding:64px 24px}
-  .hero{text-align:center;padding-top:90px}
-  h1{font-size:44px;line-height:1.15;letter-spacing:-.02em}
-  .hero p{color:var(--dim);font-size:19px;margin:18px auto 30px;max-width:640px}
-  .pill{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:5px 14px;color:var(--dim);font-size:13px;margin-bottom:22px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:36px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px}
-  .card h3{margin-bottom:8px;font-size:17px}
-  .card p{color:var(--dim);font-size:14.5px}
-  .num{font-size:40px;font-weight:800;color:var(--accent)}
-  form{background:var(--card);border:1px solid var(--line);border-radius:16px;max-width:520px;margin:0 auto;padding:28px;display:none}
-  label{display:block;font-size:13px;color:var(--dim);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.08em}
-  input,select{width:100%;background:#0e1730;border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:11px 13px;font-size:15px}
-  input:focus,select:focus{outline:none;border-color:var(--accent)}
-  #result{max-width:520px;margin:20px auto 0;text-align:center;color:var(--dim);display:none}
-  #result a,#result button.link{font-size:17px;font-weight:700;background:none;border:none;cursor:pointer;color:#60a5fa;text-decoration:none}
-  ol.steps{margin-left:20px;color:var(--dim)}ol.steps li{margin:8px 0}
-  footer{border-top:1px solid var(--line);text-align:center;color:var(--dim);font-size:13px;padding:30px}
+:root{
+  --bg-canvas:#0A0F1E;--bg-surface:#101830;--bg-elevated:#16203D;
+  --border-subtle:#1E2B52;--border-strong:#2C3D6E;
+  --text-primary:#E8EEFF;--text-secondary:#93A4CC;--text-tertiary:#5E7099;
+  --accent:#34D399;--accent-hover:#4AE8AD;--accent-muted:#0E2B21;
+  --sev-high:#F4573D;--sev-medium:#F5A623;--sev-low:#5CA8FF;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+  --font-display:'Space Grotesk',sans-serif;--font-text:'Inter',sans-serif;--font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg-canvas);color:var(--text-primary);font:16px/1.6 var(--font-text);-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent);color:#04120C}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:14px 5vw;border-bottom:1px solid transparent;transition:.3s var(--ease)}
+nav.scrolled{background:rgba(10,15,30,.72);backdrop-filter:blur(16px);border-color:var(--border-subtle)}
+.logo{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:-.01em}
+.logo b{color:var(--accent)}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#04120C;font-weight:600;font-size:15px;padding:11px 22px;border-radius:10px;border:none;cursor:pointer;font-family:var(--font-text);transition:transform .18s var(--ease),background .18s var(--ease);will-change:transform}
+.btn:hover{background:var(--accent-hover)}
+.btn:active{transform:scale(.97)!important}
+.btn.ghost{background:transparent;color:var(--text-primary);border:1px solid var(--border-strong)}
+.btn.ghost:hover{background:var(--bg-elevated)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+section{max-width:1120px;margin:0 auto;padding:96px 24px}
+.kicker{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border-strong);border-radius:99px;padding:6px 16px;color:var(--text-secondary);font-size:13px;background:rgba(16,24,48,.6)}
+.kicker i{width:6px;height:6px;border-radius:99px;background:var(--accent);display:inline-block}
+h1{font-family:var(--font-display);font-weight:700;font-size:clamp(38px,6vw,61px);line-height:1.08;letter-spacing:-.02em;margin:26px 0 20px}
+h2{font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.5vw,39px);letter-spacing:-.015em;line-height:1.15}
+.sub{color:var(--text-secondary);font-size:19px;line-height:1.65;max-width:640px}
+.center{text-align:center}.center .sub{margin-left:auto;margin-right:auto}
+.grad{background:linear-gradient(92deg,#34D399 0%,#5CA8FF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.hero{padding-top:170px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-320px;left:50%;transform:translateX(-50%);width:900px;height:520px;background:radial-gradient(ellipse at center,rgba(52,211,153,.13),transparent 62%);pointer-events:none}
+.hero .sub{margin:0 auto 34px}
+.hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+.mockup{position:relative;max-width:760px;margin:64px auto 0;text-align:left;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:18px;padding:26px 30px;transform:perspective(1200px) rotateX(2deg);box-shadow:0 32px 80px -24px rgba(0,0,0,.55)}
+.mockup-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--border-subtle);font-size:12px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.12em}
+.mockup-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px 0}
+.stat .v{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-weight:600;font-size:clamp(20px,2.6vw,27px);color:var(--accent)}
+.stat .l{color:var(--text-tertiary);font-size:12px;margin-top:2px}
+.mrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border-subtle);font-size:13.5px}
+.dot{width:7px;height:7px;border-radius:99px;flex:none}
+.mrow .t{flex:1;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrow .m{font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--text-primary)}
+
+.strip{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;padding:26px 24px;border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);color:var(--text-tertiary);font-size:13.5px}
+.strip span{display:inline-flex;align-items:center;gap:8px}
+.strip i{color:var(--accent);font-style:normal}
+
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:52px}
+.tile{grid-column:span 2;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:16px;padding:24px;transition:transform .22s var(--ease),border-color .22s var(--ease),background .22s var(--ease)}
+.tile:hover{transform:translateY(-4px);border-color:var(--border-strong);background:var(--bg-elevated)}
+.tile:nth-child(1),.tile:nth-child(6){grid-column:span 3}
+.sevline{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--text-tertiary)}
+.sevline .save{margin-left:auto;font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--accent);font-size:12.5px;letter-spacing:0;text-transform:none}
+.tile h3{font-family:var(--font-display);font-size:17px;font-weight:500;margin:14px 0 8px;letter-spacing:-.01em}
+.tile p{color:var(--text-secondary);font-size:14px;line-height:1.55}
+.tile code{display:block;margin-top:14px;background:var(--bg-canvas);border:1px solid var(--border-subtle);border-radius:8px;padding:9px 12px;font-family:var(--font-mono);font-size:12px;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:52px}
+.step{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:16px;padding:28px}
+.step .n{font-family:var(--font-mono);color:var(--accent);font-size:13px}
+.step h3{font-family:var(--font-display);font-size:18px;margin:12px 0 8px;font-weight:500}
+.step p{color:var(--text-secondary);font-size:14.5px}
+
+.calc{background:linear-gradient(180deg,var(--bg-surface),var(--bg-canvas));border:1px solid var(--border-subtle);border-radius:20px;max-width:760px;margin:52px auto 0;padding:44px 48px;text-align:center}
+.calc h3{font-family:var(--font-display);font-size:22px;font-weight:500}
+.bill-val{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:25px;color:var(--text-primary);margin-top:26px}
+input[type=range]{width:100%;margin:18px 0 8px;accent-color:var(--accent);height:28px}
+.calc-range{display:flex;justify-content:space-between;color:var(--text-tertiary);font-family:var(--font-mono);font-size:12px}
+.calc-out{margin-top:30px;padding-top:26px;border-top:1px solid var(--border-subtle)}
+.calc-out .big{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:clamp(30px,4.5vw,42px);font-weight:600;color:var(--accent)}
+.calc-out .lbl{color:var(--text-secondary);font-size:14px;margin-top:6px}
+
+.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:52px}
+.plan{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:16px;padding:30px;display:flex;flex-direction:column}
+.plan.hot{border-color:var(--accent);background:linear-gradient(180deg,var(--accent-muted),var(--bg-surface))}
+.plan .name{font-family:var(--font-display);font-size:17px}
+.plan .price{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:36px;font-weight:600;margin:14px 0 2px}
+.plan .price small{font-size:14px;color:var(--text-tertiary);font-weight:400}
+.plan ul{list-style:none;margin:20px 0 26px;flex:1}
+.plan li{color:var(--text-secondary);font-size:14px;padding:6px 0;display:flex;gap:10px}
+.plan li::before{content:"→";color:var(--accent)}
+.badge-hot{align-self:flex-start;background:var(--accent-muted);color:var(--accent);border:1px solid var(--accent);font-size:11px;letter-spacing:.08em;border-radius:99px;padding:3px 10px;margin-bottom:16px}
+
+details{border-bottom:1px solid var(--border-subtle);max-width:720px;margin:0 auto;text-align:left}
+details summary{cursor:pointer;padding:20px 8px;font-weight:500;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"+";color:var(--accent);font-size:20px;transition:transform .2s var(--ease)}
+details[open] summary::after{transform:rotate(45deg)}
+details p{color:var(--text-secondary);font-size:14.5px;padding:0 8px 22px;line-height:1.65}
+.faq-list{margin-top:44px;display:grid;gap:0}
+
+footer{border-top:1px solid var(--border-subtle);text-align:center;color:var(--text-tertiary);font-size:13px;padding:34px;margin-top:60px}
+footer .mono{color:var(--text-secondary)}
+
+#result{max-width:520px;margin:22px auto 0;text-align:center;color:var(--text-secondary);display:none}
+#result button.link,#result a{font-size:16px;font-weight:600;background:none;border:none;cursor:pointer;color:var(--accent);padding:8px 0}
+form.audit{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:18px;max-width:560px;margin:52px auto 0;padding:32px;text-align:left}
+label{display:block;font-size:12px;color:var(--text-secondary);margin:16px 0 5px;text-transform:uppercase;letter-spacing:.09em;font-weight:500}
+input[type=password],select{width:100%;background:var(--bg-canvas);border:1px solid var(--border-strong);border-radius:9px;color:var(--text-primary);padding:12px 14px;font-size:15px;font-family:var(--font-text)}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+.hint{color:var(--text-tertiary);font-size:12px;margin-top:14px}
+
+[data-reveal]{opacity:0;transform:translateY(10px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+[data-reveal].in{opacity:1;transform:none}
+
+@media(max-width:900px){
+  .bento{grid-template-columns:repeat(2,1fr)}.tile{grid-column:span 1!important}
+  .steps,.pricing{grid-template-columns:1fr}
+  .mockup-stats{grid-template-columns:1fr 1fr}
+  .calc{padding:32px 22px}
+  section{padding:72px 20px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  [data-reveal]{opacity:1;transform:none}
+  html{scroll-behavior:auto}
+}
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="logo">telemetry<b>audit</b></div>
-  <button class="btn ghost" onclick="document.getElementById('form').scrollIntoView({behavior:'smooth'});document.getElementById('form').style.display='block'">Get my free audit</button>
+<nav id="nav">
+  <div class="logo">win<b>now</b></div>
+  <div style="display:flex;gap:12px">
+    <a class="btn ghost" href="#pricing">Pricing</a>
+    <button class="btn magnet" onclick="document.getElementById('audit').scrollIntoView({behavior:'smooth'})">Run free audit</button>
+  </div>
 </nav>
 
 <section class="hero">
-  <span class="pill">Read-only · Metadata only · 2 minutes</span>
-  <h1>Find the money hiding<br/>in your Datadog bill.</h1>
-  <p>Series A–B teams routinely burn $5K–50K/month on observability — up to a third of it on metrics nobody queries and logs nobody reads. We quantify it in minutes, then help you cut it.</p>
-  <button class="btn" onclick="document.getElementById('form').scrollIntoView({behavior:'smooth'});document.getElementById('form').style.display='block'">Run my free audit →</button>
+  <span class="kicker"><i></i>Read-only · Metadata only · 2 minutes</span>
+  <h1>Find the money hiding<br/>in your <span class="grad">Datadog</span> bill.</h1>
+  <p class="sub">Series A–B teams burn $5K–50K/month on observability — up to a third of it on metrics nobody queries and logs nobody reads. We quantify the waste in dollars, in minutes.</p>
+  <div class="hero-actions">
+    <button class="btn magnet" onclick="document.getElementById('audit').scrollIntoView({behavior:'smooth'})">Run my free audit →</button>
+    <a class="btn ghost" href="#detect">See what we find</a>
+  </div>
 
-  <div class="grid">
-    <div class="card"><div class="num">~30%</div><h3>typical waste found</h3><p>Orphaned custom metrics, unfiltered log indexes, unsampled APM spans, 24/7 staging monitoring.</p></div>
-    <div class="card"><div class="num">$0</div><h3>cost of the audit</h3><p>A full report with dollar figures per finding. No agent installed, no log contents ever leave your org.</p></div>
-    <div class="card"><div class="num">2 min</div><h3>time to connect</h3><p>Paste read-only API + App keys. Revoke them whenever you want.</p></div>
+  <div class="mockup" id="mockup" aria-hidden="true">
+    <div class="mockup-head"><span>acme-demo · sample audit</span><span style="color:var(--accent)">● complete</span></div>
+    <div class="mockup-stats">
+      <div class="stat"><div class="v">$<span data-count="1638" data-suffix="-">$0</span><span style="color:var(--text-tertiary)">–</span>$<span data-count="2542">$0</span></div><div class="l">recoverable / month</div></div>
+      <div class="stat"><div class="v"><span data-count="31">$0</span>%</div><div class="l">of estimated bill</div></div>
+      <div class="stat"><div class="v"><span data-count="6">$0</span></div><div class="l">findings ranked by impact</div></div>
+    </div>
+    <div class="mrow"><span class="dot" style="background:var(--sev-high)"></span><span class="t">Custom metrics never queried anywhere</span><span class="m">$402–543/mo</span></div>
+    <div class="mrow"><span class="dot" style="background:var(--sev-high)"></span><span class="t">Log index “prod-main” · zero exclusions · 30d retention</span><span class="m">$330–518/mo</span></div>
+    <div class="mrow"><span class="dot" style="background:var(--sev-medium)"></span><span class="t">14 staging hosts monitored 24/7</span><span class="m">$282–470/mo</span></div>
+    <div class="mrow"><span class="dot" style="background:var(--sev-low)"></span><span class="t">APM spans indexed unsampled</span><span class="m">$138–241/mo</span></div>
   </div>
 </section>
 
-<section id="how">
-  <h2 style="font-size:26px;margin-bottom:14px">How it works</h2>
-  <ol class="steps">
-    <li><strong style="color:var(--txt)">Connect read-only.</strong> We pull usage meters, the custom-metrics inventory, dashboard/monitor definitions and log index config — metadata only.</li>
-    <li><strong style="color:var(--txt)">We cross-reference.</strong> Metrics you pay for vs. metrics anyone actually queried. Log indexes with zero exclusion filters. Hosts monitored while everyone sleeps.</li>
-    <li><strong style="color:var(--txt)">You get dollar figures.</strong> Each finding shows its monthly cost range and the exact fix. Apply fixes yourself, or let our guardrails watch your bill continuously.</li>
-  </ol>
+<div class="strip">
+  <span><i>✓</i> No agent installed</span>
+  <span><i>✓</i> No log contents leave your org</span>
+  <span><i>✓</i> Keys used in-memory only</span>
+  <span><i>✓</i> Revoke access anytime</span>
+</div>
+
+<section id="detect">
+  <div class="center">
+    <h2>Six ways you're bleeding.<br/>Quantified to the dollar.</h2>
+    <p class="sub" style="margin-top:16px">Every audit cross-references your paid telemetry against what humans actually query — then ranks the waste.</p>
+  </div>
+  <div class="bento">
+    <div class="tile" data-reveal><div class="sevline"><span class="dot" style="background:var(--sev-high)"></span>HIGH<span class="save">$402–543/mo*</span></div><h3>Orphaned custom metrics</h3><p>Metrics billed every month that no dashboard, monitor or notebook has queried in 30+ days.</p><code>worker.job.retry_count_v2 → 900 series</code></div>
+    <div class="tile" data-reveal><div class="sevline"><span class="dot" style="background:var(--sev-medium)"></span>MEDIUM<span class="save">cardinality ×N</span></div><h3>High-cardinality tags</h3><p>A single <span class="mono" style="font-size:12.5px">customer_id</span> tag turns one metric into thousands of billable time series.</p><code>app.checkout.abandoned_cart_value</code></div>
+    <div class="tile" data-reveal><div class="sevline"><span class="dot" style="background:var(--sev-high)"></span>HIGH<span class="save">$330–518/mo*</span></div><h3>Unfiltered log indexes</h3><p>Debug sources indexed at 30-day retention with zero exclusion filters — read once a year, paid every month.</p><code>prod-debug · 168M events · ×2 rate</code></div>
+    <div class="tile" data-reveal><div class="sevline"><span class="dot" style="background:var(--sev-high)"></span>HIGH<span class="save">~75% cut</span></div><h3>Unsampled APM spans</h3><p>Healthy traces retained at full volume. Errors and slow requests are what you actually debug.</p><code>180M spans/mo · tail-sampling</code></div>
+    <div class="tile" data-reveal><div class="sevline"><span class="dot" style="background:var(--sev-medium)"></span>MEDIUM<span class="save">$282–470/mo*</span></div><h3>Zombie staging hosts</h3><p>Non-prod runs 40h/week but meters run 168h/week. Business-hours monitoring alone recovers ~73%.</p><code>stg-node-01..14 · infra + APM</code></div>
+    <div class="tile" data-reveal><div class="sevline"><span class="dot" style="background:var(--sev-low)"></span>TIERING<span class="save">retention ×6→×1</span></div><h3>Retention misconfiguration</h3><p>90-day retention applied org-wide when compliance only requires it on two audit indexes.</p><code>security-audit: keep 90d · rest: 15d</code></div>
+  </div>
+  <p class="center hint" style="margin-top:18px">*Ranges from the sample audit above. Your numbers come from your own usage data.</p>
 </section>
 
-<section id="form" style="padding-top:20px">
-  <form onsubmit="runAudit(event)">
+<section id="how">
+  <div class="center"><h2>Audited before your coffee cools.</h2></div>
+  <div class="steps">
+    <div class="step" data-reveal><span class="n">01</span><h3>Connect read-only</h3><p>Paste API + App keys or connect via OAuth. We pull usage meters, metric inventory, dashboard definitions and log config — metadata only.</p></div>
+    <div class="step" data-reveal><span class="n">02</span><h3>We cross-reference</h3><p>Billed metrics vs queried metrics. Indexes vs exclusion filters. Host counts vs actual hours anyone is watching.</p></div>
+    <div class="step" data-reveal><span class="n">03</span><h3>You get dollar figures</h3><p>Every finding ships with its monthly cost range and the exact fix. Apply it yourself or hand it to your platform team.</p></div>
+  </div>
+</section>
+
+<section id="roi">
+  <div class="center"><h2>The math sells itself.</h2></div>
+  <div class="calc" data-reveal>
+    <h3>Your monthly Datadog bill</h3>
+    <div class="bill-val" id="billVal">$20,000</div>
+    <input type="range" id="billRange" min="5000" max="50000" step="1000" value="20000" aria-label="Monthly Datadog bill"/>
+    <div class="calc-range"><span>$5K</span><span>$50K</span></div>
+    <div class="calc-out">
+      <div class="big" id="saveVal">$4,000 – $6,200<span style="font-size:18px;color:var(--text-tertiary)">/mo</span></div>
+      <div class="lbl">typical recoverable waste (20–31%) · guardrails from $299/mo</div>
+    </div>
+  </div>
+</section>
+
+<section id="audit">
+  <div class="center"><h2>Run your free audit.</h2></div>
+  <form class="audit" onsubmit="runAudit(event)">
     <label>Audit mode</label>
     <select id="mode">
-      <option value="mock">Demo — run with sample data (no credentials)</option>
-      <option value="live">Connect my real Datadog org (read-only)</option>
+      <option value="mock">Demo — sample data, no credentials</option>
+      <option value="live">My real Datadog org (read-only)</option>
     </select>
     <div id="creds" style="display:none">
       <label>Datadog site</label>
@@ -75,21 +229,110 @@
         <option>datadoghq.com</option><option>us3.datadoghq.com</option><option>us5.datadoghq.com</option>
         <option>datadoghq.eu</option><option>ap1.datadoghq.com</option>
       </select>
-      <label>API key (read-only)</label>
+      <label>API key</label>
       <input id="apiKey" type="password" placeholder="DD_API_KEY" autocomplete="off"/>
       <label>Application key</label>
       <input id="appKey" type="password" placeholder="DD_APP_KEY" autocomplete="off"/>
     </div>
-    <p style="color:var(--dim);font-size:12px;margin-top:12px">Keys are used in-memory for this audit only and never stored.</p>
-    <button class="btn" type="submit" id="go" style="width:100%;margin-top:18px">Generate my report</button>
+    <p class="hint">Keys are held in memory for this audit only and never stored.</p>
+    <button class="btn" type="submit" id="go" style="width:100%;margin-top:20px;justify-content:center">Generate my report</button>
   </form>
-  <div id="result"></div>
+  <div id="result" role="status" aria-live="polite"></div>
 </section>
 
+<section id="pricing">
+  <div class="center"><h2>Pricing that pays for itself.</h2></div>
+  <div class="pricing">
+    <div class="plan" data-reveal><span class="badge-hot" style="visibility:hidden">·</span><div class="name">Audit</div><div class="price">$0</div><ul><li>Full report, all six detectors</li><li>Dollar figures per finding</li><li>Metadata-only, keys in-memory</li><li>No card required</li></ul><button class="btn ghost" onclick="document.getElementById('audit').scrollIntoView({behavior:'smooth'})">Start free</button></div>
+    <div class="plan hot" data-reveal><span class="badge-hot">MOST POPULAR</span><div class="name">Guardrails</div><div class="price">$299<small>/mo</small></div><ul><li>Slack alerts before the invoice lands</li><li>New costly series flagged per deploy</li><li>Auto-quarantine of orphaned metrics</li><li>Monthly CFO-ready report</li></ul><button class="btn magnet">Get guardrails</button></div>
+    <div class="plan" data-reveal><span class="badge-hot" style="visibility:hidden">·</span><div class="name">Scale</div><div class="price">$999<small>/mo</small></div><ul><li>Multi-org &amp; multi-vendor (AWS, Snowflake)</li><li>Budget caps per team/service</li><li>Savings-backed pricing option</li><li>Priority support</li></ul><button class="btn ghost">Talk to us</button></div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="center"><h2>Questions engineers ask.</h2></div>
+  <div class="faq-list">
+    <details data-reveal><summary>Is it safe to give you API keys?</summary><p>We request read-only scopes and hold keys in memory for the duration of one audit. We pull metadata — usage meters, metric names, dashboard definitions, index configs — never log contents. Revoke the app key right after if you like.</p></details>
+    <details data-reveal><summary>Why not just use Datadog's built-in cost tools?</summary><p>They exist and we recommend them — but your vendor will never tell you to leave or maximize your savings. We're vendor-neutral: our incentive is your bill going down, including by migrating signals off the meter.</p></details>
+    <details data-reveal><summary>Will cutting telemetry hurt my debugging?</summary><p>The fixes target telemetry nobody queries. For everything else we favor sampling and tiered retention over deletion — you keep error and slow traces at 100%. Every recommendation links to Datadog docs so your team can verify.</p></details>
+    <details data-reveal><summary>How accurate are the dollar estimates?</summary><p>Findings are labeled measured (from your Usage Attribution data) or estimated (heuristics), and always shown as ranges. Your contract discounts may shift absolute numbers; relative waste does not change.</p></details>
+  </div>
+</section>
+
+<footer>
+  <span class="mono">winnow</span> · separate the signals from the spend · metadata-only audits<br/><br/>
+  <span style="opacity:.6">Not affiliated with Datadog, Inc. Datadog is a trademark of Datadog, Inc.</span>
+</footer>
+
 <script>
+const BRAND = 'Winnow';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', scrollY > 24);
+}, { passive: true });
+
+function countUp(el) {
+  const target = parseInt(el.dataset.count, 10);
+  if (reduced) { el.textContent = target.toLocaleString('en-US'); return; }
+  const t0 = performance.now(), dur = 1100;
+  (function tick(t) {
+    const p = Math.min((t - t0) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(target * e).toLocaleString('en-US');
+    if (p < 1) requestAnimationFrame(tick);
+  })(t0);
+}
+
+const counted = new WeakSet();
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    el.classList.add('in');
+    el.querySelectorAll('[data-count]').forEach((c) => {
+      if (!counted.has(c)) { counted.add(c); countUp(c); }
+    });
+    io.unobserve(el);
+  });
+}, { threshold: 0.25 });
+document.querySelectorAll('[data-reveal], .mockup').forEach((el, i) => {
+  el.style.transitionDelay = (i % 3) * 60 + 'ms';
+  io.observe(el);
+});
+
+if (!reduced) {
+  const mock = document.getElementById('mockup');
+  addEventListener('scroll', () => {
+    const y = Math.min(scrollY * 0.06, 26);
+    mock.style.transform = `perspective(1200px) rotateX(2deg) translateY(${-y}px)`;
+  }, { passive: true });
+
+  document.querySelectorAll('.magnet').forEach((btn) => {
+    btn.addEventListener('mousemove', (e) => {
+      const r = btn.getBoundingClientRect();
+      const dx = ((e.clientX - r.left) / r.width - 0.5) * 10;
+      const dy = ((e.clientY - r.top) / r.height - 0.5) * 6;
+      btn.style.transform = `translate(${dx}px, ${dy}px)`;
+    });
+    btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+  });
+}
+
+const range = document.getElementById('billRange');
+range.addEventListener('input', () => {
+  const v = parseInt(range.value, 10);
+  document.getElementById('billVal').textContent = '$' + v.toLocaleString('en-US');
+  document.getElementById('saveVal').innerHTML =
+    '$' + Math.round(v * 0.2).toLocaleString('en-US') +
+    ' – $' + Math.round(v * 0.31).toLocaleString('en-US') +
+    '<span style="font-size:18px;color:var(--text-tertiary)">/mo</span>';
+});
+
 document.getElementById('mode').addEventListener('change', function(e){
   document.getElementById('creds').style.display = e.target.value === 'live' ? 'block' : 'none';
 });
+
 async function runAudit(ev) {
   ev.preventDefault();
   const btn = document.getElementById('go');
@@ -112,7 +355,7 @@ async function runAudit(ev) {
     const hi = '$' + Math.round(data.totals.monthlySavingsMaxUsd).toLocaleString();
     const url = URL.createObjectURL(new Blob([data.html], { type: 'text/html' }));
     out.style.display = 'block';
-    out.innerHTML = '<p>Report ready — estimated savings ' + lo + '–' + hi + '/mo<br/><br/></p>';
+    out.innerHTML = '<p>Report ready — estimated savings <span class="mono">' + lo + '–' + hi + '/mo</span></p>';
     const b = document.createElement('button');
     b.className = 'link';
     b.textContent = 'Open my full report ↗';
@@ -120,13 +363,11 @@ async function runAudit(ev) {
     out.appendChild(b);
   } catch (e) {
     out.style.display = 'block';
-    out.innerHTML = '<p style="color:#ef4444">' + e.message + '</p>';
+    out.innerHTML = '<p style="color:var(--sev-high)">' + e.message + '</p>';
   } finally {
     btn.disabled = false; btn.textContent = 'Generate my report';
   }
 }
 </script>
-
-<footer>telemetryaudit · metadata-only audits · pricing assumptions fully configurable</footer>
 </body>
 </html>

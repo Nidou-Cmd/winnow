@@ -1,8 +1,8 @@
-# telemetry-cost-audit
+# Winnow
 
-**Audit et réduction automatisée des factures Datadog.** Zéro dépendance Node.js (≥18).
+**Séparer les signaux de la dépense : audit et réduction automatisée des factures Datadog.** Zéro dépendance Node.js (≥18).
 
-> L'idée en une phrase : les startups Series A–B brûlent 5–50K$/mois d'observabilité dont ~30% part en gaspillage (métriques custom jamais requêtées, logs sans exclusion filters, spans APM non échantillonnées, hosts de staging monitorés 24/7) — cet outil le chiffre en dollars et produit un rapport d'audit en 2 minutes.
+> Le nom : *winnow* = vanner, séparer le grain de l'ivraie. Winnow sépare les signaux qui comptent du gaspillage facturé — métriques custom jamais requêtées, logs sans exclusion filters, spans APM non échantillonnées, hosts de staging monitorés 24/7 (~30% d'une facture de 5–50K$/mois typique). Domaine cible : getwinnow.io
 
 ## Démarrage rapide
 
@@ -44,8 +44,8 @@ entreprise (données restant dans leur org).
 ```bash
 # Sur un VPS Linux (Hetzner / DO / OVH)
 curl -fsSL https://get.openship.io | sh && openship up
-# Puis importer Nidou-Cmd/telemetry-cost-audit depuis le dashboard ou :
-openship deploy Nidou-Cmd/telemetry-cost-audit
+# Puis importer Nidou-Cmd/winnow depuis le dashboard ou :
+openship deploy Nidou-Cmd/winnow
 ```
 
 > Le runtime self-host d'Openship héberge les apps sur **Linux** ; sous Windows,
