@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js" defer></script>
 <style>
 :root{
   --bg-canvas:#0A0F1E;--bg-surface:#101830;--bg-elevated:#16203D;
@@ -244,8 +245,8 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
   <div class="center"><h2>Pricing that pays for itself.</h2></div>
   <div class="pricing">
     <div class="plan" data-reveal><span class="badge-hot" style="visibility:hidden">·</span><div class="name">Audit</div><div class="price">$0</div><ul><li>Full report, all six detectors</li><li>Dollar figures per finding</li><li>Metadata-only, keys in-memory</li><li>No card required</li></ul><button class="btn ghost" onclick="document.getElementById('audit').scrollIntoView({behavior:'smooth'})">Start free</button></div>
-    <div class="plan hot" data-reveal><span class="badge-hot">MOST POPULAR</span><div class="name">Guardrails</div><div class="price">$299<small>/mo</small></div><ul><li>Slack alerts before the invoice lands</li><li>New costly series flagged per deploy</li><li>Auto-quarantine of orphaned metrics</li><li>Monthly CFO-ready report</li></ul><button class="btn magnet">Get guardrails</button></div>
-    <div class="plan" data-reveal><span class="badge-hot" style="visibility:hidden">·</span><div class="name">Scale</div><div class="price">$999<small>/mo</small></div><ul><li>Multi-org &amp; multi-vendor (AWS, Snowflake)</li><li>Budget caps per team/service</li><li>Savings-backed pricing option</li><li>Priority support</li></ul><button class="btn ghost">Talk to us</button></div>
+    <div class="plan hot" data-reveal><span class="badge-hot">MOST POPULAR</span><div class="name">Guardrails</div><div class="price">$299<small>/mo</small></div><ul><li>Slack alerts before the invoice lands</li><li>New costly series flagged per deploy</li><li>Auto-quarantine of orphaned metrics</li><li>Monthly CFO-ready report</li></ul><button class="btn magnet" id="buyGuardrails">Get guardrails</button></div>
+    <div class="plan" data-reveal><span class="badge-hot" style="visibility:hidden">·</span><div class="name">Scale</div><div class="price">$999<small>/mo</small></div><ul><li>Multi-org &amp; multi-vendor (AWS, Snowflake)</li><li>Budget caps per team/service</li><li>Savings-backed pricing option</li><li>Priority support</li></ul><button class="btn ghost" id="buyScale">Talk to us</button></div>
   </div>
 </section>
 
@@ -266,6 +267,13 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
 
 <script>
 const BRAND = 'Winnow';
+
+const PADDLE_CONFIG = {
+  clientToken: 'PASTE_YOUR_PADDLE_CLIENT_SIDE_TOKEN',
+  environment: 'production',
+  prices: { Guardrails: 'PASTE_PRICE_ID_299', Scale: 'PASTE_PRICE_ID_999' },
+  contactEmail: 'hello@getwinnow.io'
+};
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 addEventListener('scroll', () => {
@@ -332,6 +340,32 @@ range.addEventListener('input', () => {
 document.getElementById('mode').addEventListener('change', function(e){
   document.getElementById('creds').style.display = e.target.value === 'live' ? 'block' : 'none';
 });
+
+window.addEventListener('load', () => {
+  if (window.Paddle && !PADDLE_CONFIG.clientToken.startsWith('PASTE')) {
+    Paddle.Environment.set(PADDLE_CONFIG.environment);
+    Paddle.Initialize({ token: PADDLE_CONFIG.clientToken });
+  }
+});
+
+function openCheckout(plan) {
+  const configured = window.Paddle
+    && !PADDLE_CONFIG.clientToken.startsWith('PASTE')
+    && PADDLE_CONFIG.prices[plan]
+    && !PADDLE_CONFIG.prices[plan].startsWith('PASTE');
+  if (!configured) {
+    location.href = 'mailto:' + PADDLE_CONFIG.contactEmail
+      + '?subject=' + encodeURIComponent('Winnow — ' + plan + ' plan')
+      + '&body=' + encodeURIComponent("Hi, I'd like to subscribe to the " + plan + " plan. Here's my org and preferred start date:");
+    return;
+  }
+  Paddle.Checkout.open({
+    settings: { locale: 'en', theme: 'dark', displayMode: 'overlay' },
+    items: [{ priceId: PADDLE_CONFIG.prices[plan], quantity: 1 }]
+  });
+}
+document.getElementById('buyGuardrails').addEventListener('click', () => openCheckout('Guardrails'));
+document.getElementById('buyScale').addEventListener('click', () => openCheckout('Scale'));
 
 async function runAudit(ev) {
   ev.preventDefault();
