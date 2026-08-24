@@ -91,7 +91,9 @@ export class DatadogClient {
     const metricNames = [];
     let cursor;
     for (let page = 0; page < 20; page++) {
-      const res = await this.safe('/api/v2/metrics', { window__seconds: undefined, window_seconds: 604800, page_cursor: cursor });
+      const query = { window_seconds: 604800 };
+      if (cursor) query['page[cursor]'] = cursor;
+      const res = await this.safe('/api/v2/metrics', { query });
       if (!res?.data) break;
       metricNames.push(...res.data.map((m) => m.attributes?.name ?? m.id));
       cursor = res.meta?.page?.after;
@@ -133,6 +135,7 @@ export function normalizeUsage({ usageCustom, usageLogs, usageHosts, usageSpans,
     sumHours(usageCustom, (h) => h.hour_f ? h.custom_metrics_usage : 0);
   const logsIngestedGb = sumHours(usageLogs, (h) => h.ingested_usage_bytes) / 1e9;
   const logsIndexedEvents = sumHours(usageLogs, (h) => h.indexed_events_usage);
+  const spansIndexedEvents = sumHours(usageSpans, (h) => h.indexed_events_usage ?? h.indexed_events ?? h.events);
   const infraHostHours = sumHours(usageHosts, (h) => h.host_hour_usage ?? h.host_hours);
   const apmHostHours = Array.isArray(usageSpans)
     ? usageSpans.reduce((a, r) => a + (r.host_hour_usage ?? 0), 0)
@@ -142,7 +145,7 @@ export function normalizeUsage({ usageCustom, usageLogs, usageHosts, usageSpans,
     customMetricsTotal,
     logsIngestedGb,
     logsIndexedEvents,
-    spansIndexedEvents: 0,
+    spansIndexedEvents,
     infraHostsAvg: infraHostHours / 168 || 0,
     apmHostsAvg: apmHostHours / 168 || 0,
     attributionAvailable: Boolean(attribution?.usage)
@@ -160,24 +163,36 @@ export function extractAttributionMetrics(attribution) {
   return out;
 }
 
-const METRIC_TOKEN = /\b([a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z0-9_]+)+)\b/g;
+const METRIC_TOKEN = /\b([a-zA-Z][a-zA-Z0-9_\-\/]*(?:\.[a-zA-Z0-9_\-\/]+)+)\b/g;
 
 export function extractQueriedMetrics(dashboardsRes, monitorsRes) {
   const found = new Set();
   const scanText = (text) => {
     if (typeof text !== 'string') return;
-    for (const match of text.matchAll(METRIC_TOKEN)) found.add(match[1].replace(/\*+$/, ''));
+    for (const match of text.matchAll(METRIC_TOKEN)) {
+      const clean = match[1].replace(/[*:,{}]+$/, '');
+      if (clean) found.add(clean);
+    }
   };
   const walk = (node) => {
-    if (Array.isArray(node)) return node.forEach(walk);
+    if (typeof node === 'string') {
+      scanText(node);
+      return;
+    }
+    if (Array.isArray(node)) {
+      node.forEach(walk);
+      return;
+    }
     if (node && typeof node === 'object') {
       for (const [key, value] of Object.entries(node)) {
-        if (['q', 'query', 'metric', 'metrics'].includes(key)) scanText(String(value));
-        else walk(value);
+        if (['q', 'query', 'metric', 'metrics', 'formula', 'expression', 'target'].includes(key)) {
+          scanText(String(value));
+        }
+        walk(value);
       }
     }
   };
-  walk(dashboardsRes?.dashboards ?? []);
+  walk(dashboardsRes?.dashboards ?? dashboardsRes ?? []);
   walk(monitorsRes ?? []);
   return found;
 }

@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { buildDemoSnapshot } from '../src/mock/fixtures.mjs';
 import { DatadogClient } from '../src/datadog/client.mjs';
+import { createPricing } from '../src/config/pricing.mjs';
 import { runAudit } from '../src/engine/engine.mjs';
 import { renderHtmlReport } from '../src/report/html.mjs';
 
@@ -23,9 +24,9 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const command = args._[0] ?? 'audit';
 
-  if (command !== 'audit') {
-    console.error('Usage: node bin/cli.mjs audit [--mock | --api-key=... --app-key=... --site=datadoghq.com] [--out=DIR]');
-    process.exit(1);
+  if (command !== 'audit' || args.help) {
+    console.error('Usage: node bin/cli.mjs audit [--mock | --api-key=... --app-key=... --site=datadoghq.com] [--discount=N%] [--json] [--out=DIR]');
+    process.exit(args.help ? 0 : 1);
   }
 
   let snapshot;
@@ -41,7 +42,24 @@ async function main() {
     console.log(`[audit] collection finished with ${snapshot.warnings.length} warning(s)`);
   }
 
-  const audit = runAudit(snapshot);
+  const discountPercent = parseFloat(args.discount ?? 0);
+  const pricing = createPricing({ discountPercent });
+  const audit = runAudit(snapshot, pricing);
+
+  if (args.json) {
+    const jsonOutput = JSON.stringify(audit, null, 2);
+    if (args.out) {
+      const outDir = resolve(args.out);
+      mkdirSync(outDir, { recursive: true });
+      const file = resolve(outDir, `audit-${args.mock ? 'demo' : 'live'}.json`);
+      writeFileSync(file, jsonOutput);
+      console.log(`  JSON Report: ${file}`);
+    } else {
+      console.log(jsonOutput);
+    }
+    return;
+  }
+
   const html = renderHtmlReport(audit);
 
   const outDir = resolve(args.out ?? process.env.AUDIT_OUT_DIR ?? resolve(tmpdir(), 'telemetry-audit-reports'));
@@ -52,6 +70,7 @@ async function main() {
 
   console.log('');
   console.log(`  Organization : ${snapshot.meta.org ?? '(from API)'}`);
+  if (discountPercent > 0) console.log(`  Discount     : ${discountPercent}% applied`);
   console.log(`  Est. bill    : ${usd(audit.totalBaselineUsd)}/mo`);
   console.log(`  Savings      : ${usd(audit.totals.monthlySavingsMinUsd)} - ${usd(audit.totals.monthlySavingsMaxUsd)}/mo (${audit.totals.percentOfBillMin}%-${audit.totals.percentOfBillMax}%)`);
   console.log(`  Findings     : ${audit.findings.length}`);

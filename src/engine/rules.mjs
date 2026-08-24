@@ -173,3 +173,23 @@ export function ruleZombieHosts(snapshot, pricing) {
     docsUrl: 'https://docs.datadoghq.com/account_management/billing/'
   };
 }
+
+export function ruleHighVolumeLogIngestion(snapshot, pricing) {
+  const ingestedGb = snapshot.usage.logsIngestedGb ?? 0;
+  if (ingestedGb < 500) return null;
+  const currentCost = ingestedGb * pricing.logsIngestedPerGb;
+  const savings = currentCost * 0.35;
+  return {
+    id: 'high-volume-log-ingestion',
+    title: `Massive log ingestion volume (${Math.round(ingestedGb).toLocaleString()} GB/mo, $${fmt(currentCost)}/mo)`,
+    category: 'logs',
+    severity: currentCost > 300 ? 'high' : 'medium',
+    confidence: confidence.estimated,
+    description: `Your application sends ~${Math.round(ingestedGb).toLocaleString()} GB of raw logs per month into Datadog ingestion pipelines. Much of this is debug or noisy heartbeat data that can be filtered at the Agent level before hitting network ingestion.`,
+    evidence: { ingestedGb: Math.round(ingestedGb), currentMonthlyCostUsd: fmt(currentCost) },
+    recommendation: 'Configure log processing rules in the Datadog Agent (log_processing_rules: exclude_at_match) to discard health checks, router keep-alives, and debug payloads at source before network ingestion.',
+    estMonthlySavingsMin: fmt(savings * 0.7),
+    estMonthlySavingsMax: fmt(savings * 1.15),
+    docsUrl: 'https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfiles#filter-logs'
+  };
+}

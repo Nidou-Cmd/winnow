@@ -16,12 +16,22 @@ const MIME = {
 
 function send(res, code, body, type = 'application/json') {
   const payload = typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body);
-  res.writeHead(code, { 'Content-Type': type, 'Content-Length': Buffer.byteLength(payload) });
+  res.writeHead(code, {
+    'Content-Type': type,
+    'Content-Length': Buffer.byteLength(payload),
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  });
   res.end(payload);
 }
 
 const server = http.createServer(async (req, res) => {
   try {
+    if (req.method === 'OPTIONS') {
+      return send(res, 204, '');
+    }
+
     const url = new URL(req.url, `http://${req.headers.host}`);
 
     if (req.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html')) {

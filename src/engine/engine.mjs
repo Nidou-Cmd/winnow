@@ -3,6 +3,7 @@ import {
   ruleOrphanedCustomMetrics,
   ruleHighCardinalityTags,
   ruleLogExclusionsAndRetention,
+  ruleHighVolumeLogIngestion,
   ruleSpanTailSampling,
   ruleZombieHosts
 } from './rules.mjs';
@@ -37,6 +38,7 @@ export function runAudit(snapshot, pricing = defaultPricing) {
     ruleOrphanedCustomMetrics,
     ruleHighCardinalityTags,
     ruleLogExclusionsAndRetention,
+    ruleHighVolumeLogIngestion,
     ruleSpanTailSampling,
     ruleZombieHosts
   ];
@@ -65,7 +67,12 @@ export function runAudit(snapshot, pricing = defaultPricing) {
   const baseline = estimateBaseline(snapshot, pricing);
   const totalBaseline = Object.values(baseline).reduce((a, b) => a + b, 0);
 
-  const caps = { custom_metrics: baseline.customMetricsOverage };
+  const caps = {
+    custom_metrics: baseline.customMetricsOverage,
+    logs: baseline.logsIngest + baseline.logsIndexed,
+    apm: baseline.apm + baseline.apmSpans,
+    hosts: baseline.infra + baseline.apm
+  };
   const spent = {};
   const capped = findings.map((f) => {
     if (!(f.category in caps)) return f;

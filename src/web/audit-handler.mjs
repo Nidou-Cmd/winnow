@@ -1,5 +1,6 @@
 import { buildDemoSnapshot } from '../mock/fixtures.mjs';
 import { DatadogClient } from '../datadog/client.mjs';
+import { createPricing } from '../config/pricing.mjs';
 import { runAudit } from '../engine/engine.mjs';
 import { renderHtmlReport } from '../report/html.mjs';
 
@@ -26,7 +27,11 @@ export async function runAuditFromBody(body) {
     });
     snapshot = await client.collectAll();
   }
-  const audit = runAudit(snapshot);
+  const pricing = createPricing({
+    discountPercent: body.discountPercent ?? body.discount ?? 0,
+    overrides: body.pricing ?? {}
+  });
+  const audit = runAudit(snapshot, pricing);
   return {
     totals: audit.totals,
     findings: audit.findings.map((f) => ({ title: f.title, severity: f.severity })),
