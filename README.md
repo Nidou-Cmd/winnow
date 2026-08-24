@@ -19,6 +19,41 @@ node bin/server.mjs
 # → http://127.0.0.1:3000  puis POST /api/audit {"mode":"mock"}
 ```
 
+## Déployer avec Openship
+
+Le repo est prêt pour [Openship](https://github.com/oblien/openship) (plateforme de
+déploiement self-hosted, Apache-2.0) : `openship.json` à la racine fixe la commande de
+démarrage, le port et l'environnement ; un `Dockerfile` est fourni si tu préfères le
+runtime Docker.
+
+### Option A — VPS Linux (recommandé, push-to-deploy)
+
+```bash
+# 1. Sur un VPS Linux (Hetzner / DO / OVH, Ubuntu 22.04+)
+curl -fsSL https://get.openship.io | sh     # installe le CLI + control plane
+openship up                                  # démarre le control plane
+
+# 2. Depuis ta machine (ou le dashboard du serveur)
+openship deploy Nidou-Cmd/telemetry-cost-audit   # détecte Node, applique openship.json
+```
+
+Auto-deploy : connecte le repo GitHub dans le dashboard Openship → chaque `git push`
+redéploie. Le healthcheck utilise `/` et `/healthz` (200 attendu).
+
+### Option B — App desktop Windows → serveur SSH
+
+Télécharger `Openship-win32-x64.zip` (releases GitHub), pointer l'app vers ton VPS
+Linux en SSH, importer le repo — même résultat, sans toucher au terminal.
+
+### Option C — Local maintenant
+
+```bash
+node bin/server.mjs          # ou : docker build -t tca . && docker run -p 3000:3000 tca
+```
+
+> Rappel : le runtime self-host d'Opensship héberge les apps sur **Linux** ; sous
+> Windows, l'app desktop pilote un serveur Linux distant via SSH.
+
 ## Architecture
 
 ```

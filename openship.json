@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openship.io/openship.schema.json",
+  "startCommand": "node bin/server.mjs",
+  "port": 3000,
+  "workload": "web",
+  "env": {
+    "NODE_ENV": { "value": "production" }
+  }
+}
