@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>TelemetryAudit - Stop overpaying Datadog</title>
+<title>TelemetryAudit — Stop overpaying Datadog</title>
 <style>
   :root{--bg:#0b1020;--card:#121a33;--line:#22305c;--txt:#e5ecff;--dim:#93a4cc;--accent:#34d399}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -28,7 +28,7 @@
   input,select{width:100%;background:#0e1730;border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:11px 13px;font-size:15px}
   input:focus,select:focus{outline:none;border-color:var(--accent)}
   #result{max-width:520px;margin:20px auto 0;text-align:center;color:var(--dim);display:none}
-  #result a{font-size:17px;font-weight:700}
+  #result a,#result button.link{font-size:17px;font-weight:700;background:none;border:none;cursor:pointer;color:#60a5fa;text-decoration:none}
   ol.steps{margin-left:20px;color:var(--dim)}ol.steps li{margin:8px 0}
   footer{border-top:1px solid var(--line);text-align:center;color:var(--dim);font-size:13px;padding:30px}
 </style>
@@ -41,10 +41,10 @@
 </nav>
 
 <section class="hero">
-  <span class="pill">Read-only &middot; Metadata only &middot; 2 minutes</span>
+  <span class="pill">Read-only · Metadata only · 2 minutes</span>
   <h1>Find the money hiding<br/>in your Datadog bill.</h1>
-  <p>Series A-B teams routinely burn $5K-50K/month on observability - up to a third of it on metrics nobody queries and logs nobody reads. We quantify it in minutes, then help you cut it.</p>
-  <button class="btn" onclick="document.getElementById('form').scrollIntoView({behavior:'smooth'});document.getElementById('form').style.display='block'">Run my free audit &#8594;</button>
+  <p>Series A–B teams routinely burn $5K–50K/month on observability — up to a third of it on metrics nobody queries and logs nobody reads. We quantify it in minutes, then help you cut it.</p>
+  <button class="btn" onclick="document.getElementById('form').scrollIntoView({behavior:'smooth'});document.getElementById('form').style.display='block'">Run my free audit →</button>
 
   <div class="grid">
     <div class="card"><div class="num">~30%</div><h3>typical waste found</h3><p>Orphaned custom metrics, unfiltered log indexes, unsampled APM spans, 24/7 staging monitoring.</p></div>
@@ -56,7 +56,7 @@
 <section id="how">
   <h2 style="font-size:26px;margin-bottom:14px">How it works</h2>
   <ol class="steps">
-    <li><strong style="color:var(--txt)">Connect read-only.</strong> We pull usage meters, the custom-metrics inventory, dashboard/monitor definitions and log index config - metadata only.</li>
+    <li><strong style="color:var(--txt)">Connect read-only.</strong> We pull usage meters, the custom-metrics inventory, dashboard/monitor definitions and log index config — metadata only.</li>
     <li><strong style="color:var(--txt)">We cross-reference.</strong> Metrics you pay for vs. metrics anyone actually queried. Log indexes with zero exclusion filters. Hosts monitored while everyone sleeps.</li>
     <li><strong style="color:var(--txt)">You get dollar figures.</strong> Each finding shows its monthly cost range and the exact fix. Apply fixes yourself, or let our guardrails watch your bill continuously.</li>
   </ol>
@@ -66,7 +66,7 @@
   <form onsubmit="runAudit(event)">
     <label>Audit mode</label>
     <select id="mode">
-      <option value="mock">Demo - run with sample data (no credentials)</option>
+      <option value="mock">Demo — run with sample data (no credentials)</option>
       <option value="live">Connect my real Datadog org (read-only)</option>
     </select>
     <div id="creds" style="display:none">
@@ -94,7 +94,7 @@ async function runAudit(ev) {
   ev.preventDefault();
   const btn = document.getElementById('go');
   const out = document.getElementById('result');
-  btn.disabled = true; btn.textContent = 'Auditing'; out.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Auditing…'; out.style.display = 'none';
   try {
     const res = await fetch('/api/audit', {
       method: 'POST',
@@ -110,8 +110,14 @@ async function runAudit(ev) {
     if (!res.ok) throw new Error(data.error || 'Audit failed');
     const lo = '$' + Math.round(data.totals.monthlySavingsMinUsd).toLocaleString();
     const hi = '$' + Math.round(data.totals.monthlySavingsMaxUsd).toLocaleString();
+    const url = URL.createObjectURL(new Blob([data.html], { type: 'text/html' }));
     out.style.display = 'block';
-    out.innerHTML = '<p>Report ready - estimated savings ' + lo + '-' + hi + '/mo</p><a href="' + data.url + '" target="_blank">Open my full report &#8599;</a>';
+    out.innerHTML = '<p>Report ready — estimated savings ' + lo + '–' + hi + '/mo<br/><br/></p>';
+    const b = document.createElement('button');
+    b.className = 'link';
+    b.textContent = 'Open my full report ↗';
+    b.onclick = function(){ window.open(url, '_blank'); };
+    out.appendChild(b);
   } catch (e) {
     out.style.display = 'block';
     out.innerHTML = '<p style="color:#ef4444">' + e.message + '</p>';
@@ -121,6 +127,6 @@ async function runAudit(ev) {
 }
 </script>
 
-<footer>telemetryaudit &middot; metadata-only audits &middot; pricing assumptions fully configurable</footer>
+<footer>telemetryaudit · metadata-only audits · pricing assumptions fully configurable</footer>
 </body>
 </html>

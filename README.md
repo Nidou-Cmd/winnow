@@ -19,46 +19,51 @@ node bin/server.mjs
 # → http://127.0.0.1:3000  puis POST /api/audit {"mode":"mock"}
 ```
 
-## Déployer avec Openship
+## Déployer
 
-Le repo est prêt pour [Openship](https://github.com/oblien/openship) (plateforme de
-déploiement self-hosted, Apache-2.0) : `openship.json` à la racine fixe la commande de
-démarrage, le port et l'environnement ; un `Dockerfile` est fourni si tu préfères le
-runtime Docker.
+### Vercel (recommandé pour la phase de validation)
 
-### Option A — VPS Linux (recommandé, push-to-deploy)
+Le repo contient `api/audit.mjs` (fonction serverless, maxDuration 60s) et la landing
+statique dans `public/`. Les rapports sont générés à la volée et renvoyés dans la
+réponse HTTP — aucun stockage disque nécessaire.
 
 ```bash
-# 1. Sur un VPS Linux (Hetzner / DO / OVH, Ubuntu 22.04+)
-curl -fsSL https://get.openship.io | sh     # installe le CLI + control plane
-openship up                                  # démarre le control plane
-
-# 2. Depuis ta machine (ou le dashboard du serveur)
-openship deploy Nidou-Cmd/telemetry-cost-audit   # détecte Node, applique openship.json
+npm i -g vercel        # ou : npx vercel
+vercel login
+vercel --prod
 ```
 
-Auto-deploy : connecte le repo GitHub dans le dashboard Openship → chaque `git push`
-redéploie. Le healthcheck utilise `/` et `/healthz` (200 attendu).
+Chaque `git push` sur la branche connectée redéploie automatiquement.
 
-### Option B — App desktop Windows → serveur SSH
+### Openship (option self-hosted / BYOC)
 
-Télécharger `Openship-win32-x64.zip` (releases GitHub), pointer l'app vers ton VPS
-Linux en SSH, importer le repo — même résultat, sans toucher au terminal.
+Le repo reste prêt pour [Openship](https://github.com/oblien/openship) : `openship.json`
+à la racine + `Dockerfile`. Utile quand tu proposeras un tier "self-hosted" aux clients
+entreprise (données restant dans leur org).
 
-### Option C — Local maintenant
+```bash
+# Sur un VPS Linux (Hetzner / DO / OVH)
+curl -fsSL https://get.openship.io | sh && openship up
+# Puis importer Nidou-Cmd/telemetry-cost-audit depuis le dashboard ou :
+openship deploy Nidou-Cmd/telemetry-cost-audit
+```
+
+> Le runtime self-host d'Openship héberge les apps sur **Linux** ; sous Windows,
+> l'app desktop pilote un serveur Linux distant via SSH.
+
+### Local
 
 ```bash
 node bin/server.mjs          # ou : docker build -t tca . && docker run -p 3000:3000 tca
 ```
 
-> Rappel : le runtime self-host d'Opensship héberge les apps sur **Linux** ; sous
-> Windows, l'app desktop pilote un serveur Linux distant via SSH.
-
 ## Architecture
 
 ```
 bin/cli.mjs            CLI d'audit (--mock | clés Datadog)
-bin/server.mjs         Serveur HTTP minimal (landing + POST /api/audit + rapports HTML)
+bin/server.mjs         Serveur local (landing + POST /api/audit)
+api/audit.mjs          Fonction serverless Vercel (même handler que le serveur local)
+src/web/audit-handler.mjs  Logique partagée : snapshot -> audit -> {totals, findings, html}
 src/datadog/client.mjs Client API Datadog read-only (usage metering, attribution,
                        métriques actives, dashboards/monitors, indexes logs)
 src/engine/rules.mjs   Règles d'économies v1 :
