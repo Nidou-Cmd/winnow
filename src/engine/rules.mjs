@@ -186,10 +186,28 @@ export function ruleHighVolumeLogIngestion(snapshot, pricing) {
     severity: currentCost > 300 ? 'high' : 'medium',
     confidence: confidence.estimated,
     description: `Your application sends ~${Math.round(ingestedGb).toLocaleString()} GB of raw logs per month into Datadog ingestion pipelines. Much of this is debug or noisy heartbeat data that can be filtered at the Agent level before hitting network ingestion.`,
-    evidence: { ingestedGb: Math.round(ingestedGb), currentMonthlyCostUsd: fmt(currentCost) },
     recommendation: 'Configure log processing rules in the Datadog Agent (log_processing_rules: exclude_at_match) to discard health checks, router keep-alives, and debug payloads at source before network ingestion.',
     estMonthlySavingsMin: fmt(savings * 0.7),
     estMonthlySavingsMax: fmt(savings * 1.15),
     docsUrl: 'https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfiles#filter-logs'
+  };
+}
+
+export function ruleAwsUnattachedEbsVolumes(snapshot) {
+  const unattached = snapshot.awsUnattachedEbsVolumes ?? [];
+  if (!unattached.length) return null;
+  const monthlySavings = unattached.reduce((acc, vol) => acc + (vol.gbSize ?? 0) * 0.10, 0);
+
+  return {
+    id: 'aws-unattached-ebs-volumes',
+    title: `${unattached.length} unattached AWS EBS volumes incurring storage charges`,
+    category: 'aws_cloud',
+    severity: monthlySavings > 150 ? 'high' : 'medium',
+    confidence: confidence.measured,
+    description: 'Found unattached EBS volumes (detached from EC2 instances) that continue to incur storage fees.',
+    recommendation: 'Create a snapshot if data is needed, then delete unattached EBS volumes via AWS Console or CLI.',
+    estMonthlySavingsMin: fmt(monthlySavings * 0.9),
+    estMonthlySavingsMax: fmt(monthlySavings * 1.1),
+    docsUrl: 'https://aws.amazon.com/ebs/pricing/'
   };
 }
