@@ -16,6 +16,11 @@ export async function readJsonBody(req, limit = 64 * 1024) {
 }
 
 export async function runAuditFromBody(body) {
+  const requiredPassword = process.env.SITE_PASSWORD;
+  if (requiredPassword && body.sitePassword !== requiredPassword && body.password !== requiredPassword) {
+    throw Object.assign(new Error("🔒 Accès restreint. Mot de passe d'accès requis pendant la phase de configuration."), { status: 401 });
+  }
+
   let snapshot;
   if (body.mode === 'mock') {
     snapshot = buildDemoSnapshot();
