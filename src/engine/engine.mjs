@@ -90,6 +90,12 @@ export function runAudit(snapshot, pricing = defaultPricing) {
   const totalMin = findings.reduce((a, f) => a + f.estMonthlySavingsMin, 0);
   const totalMax = findings.reduce((a, f) => a + f.estMonthlySavingsMax, 0);
 
+  const monthlyMax = round(totalMax);
+  const annualMax = round(totalMax * 12);
+  const percentMax = totalBaseline ? round((totalMax / totalBaseline) * 100) : 0;
+
+  const executiveAiSummary = `Winnow Audit Analysis: Identified $${monthlyMax.toLocaleString()}/month ($${annualMax.toLocaleString()}/year) in potential Datadog invoice optimization (~${percentMax}% of total spend). Primary driver: ${findings[0]?.title ?? "Orphaned Custom Metrics"}.`;
+
   return {
     meta: snapshot.meta,
     baseline,
@@ -103,6 +109,7 @@ export function runAudit(snapshot, pricing = defaultPricing) {
       percentOfBillMin: totalBaseline ? round((totalMin / totalBaseline) * 100) : 0,
       percentOfBillMax: totalBaseline ? round((totalMax / totalBaseline) * 100) : 0
     },
+    executiveAiSummary,
     warnings: snapshot.warnings ?? []
   };
 }
