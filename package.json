@@ -1,6 +1,6 @@
 {
   "name": "winnow",
-  "version": "0.2.0",
+  "version": "1.1.0",
   "description": "Audit and continuously cut Datadog observability bills. Zero-dependency Node.js.",
   "type": "module",
   "engines": {
