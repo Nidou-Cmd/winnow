@@ -211,3 +211,24 @@ export function ruleAwsUnattachedEbsVolumes(snapshot) {
     docsUrl: 'https://aws.amazon.com/ebs/pricing/'
   };
 }
+
+export function ruleGcpBigQueryQueryCosts(snapshot) {
+  const scannedTb = snapshot.gcpBigQueryScannedTbMonthly ?? 0;
+  if (scannedTb < 5) return null;
+  const costPerTbUsd = 6.25;
+  const monthlyCost = scannedTb * costPerTbUsd;
+  const savings = monthlyCost * 0.40;
+
+  return {
+    id: 'gcp-bigquery-unpartitioned-scans',
+    title: `GCP BigQuery unpartitioned table scans (${scannedTb} TB/mo, $${fmt(monthlyCost)}/mo)`,
+    category: 'gcp_cloud',
+    severity: monthlyCost > 200 ? 'high' : 'medium',
+    confidence: confidence.estimated,
+    description: `BigQuery queries scan full unpartitioned tables (${scannedTb} TB processed). Partitioning by day/timestamp will cut scanned bytes significantly.`,
+    recommendation: 'Partition large tables by DATE(_PARTITIONTIME) or ingestion time to reduce query scan volume and cost.',
+    estMonthlySavingsMin: fmt(savings * 0.8),
+    estMonthlySavingsMax: fmt(savings * 1.2),
+    docsUrl: 'https://cloud.google.com/bigquery/docs/partitioned-tables'
+  };
+}
