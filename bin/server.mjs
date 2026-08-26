@@ -44,6 +44,24 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, result);
     }
 
+    if (req.method === 'POST' && (url.pathname === '/api/paystack/initialize' || url.pathname === '/api/paystack-initialize')) {
+      const initHandler = (await import('../api/paystack-initialize.mjs')).default;
+      return initHandler(req, {
+        status: (code) => ({
+          json: (data) => send(res, code, data)
+        })
+      });
+    }
+
+    if (req.method === 'POST' && (url.pathname === '/api/paystack/webhook' || url.pathname === '/api/paystack-webhook')) {
+      const webhookHandler = (await import('../api/paystack-webhook.mjs')).default;
+      return webhookHandler(req, {
+        status: (code) => ({
+          json: (data) => send(res, code, data)
+        })
+      });
+    }
+
     if (req.method === 'GET' && url.pathname === '/healthz') {
       return send(res, 200, '{"ok":true}');
     }
