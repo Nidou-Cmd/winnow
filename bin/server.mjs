@@ -1,11 +1,25 @@
 import http from 'node:http';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve, extname } from 'node:path';
 import { readJsonBody, runAuditFromBody } from '../src/web/audit-handler.mjs';
 
+const ROOT = resolve(import.meta.dirname, '..');
+
+// Load .env.local if present
+const envPath = resolve(ROOT, '.env.local');
+if (existsSync(envPath)) {
+  const envText = readFileSync(envPath, 'utf8');
+  for (const line of envText.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+      const [key, ...vals] = trimmed.split('=');
+      process.env[key.trim()] = vals.join('=').trim();
+    }
+  }
+}
+
 const PORT = Number(process.env.PORT ?? 3000);
 const HOST = process.env.HOST ?? '127.0.0.1';
-const ROOT = resolve(import.meta.dirname, '..');
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',

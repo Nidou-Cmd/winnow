@@ -348,16 +348,29 @@ window.addEventListener('load', () => {
   }
 });
 
-function openCheckout(plan) {
-  const configured = window.Paddle
-    && !PADDLE_CONFIG.clientToken.startsWith('PASTE')
-    && PADDLE_CONFIG.prices[plan]
-    && !PADDLE_CONFIG.prices[plan].startsWith('PASTE');
-  if (!configured) {
-    location.href = 'mailto:' + PADDLE_CONFIG.contactEmail
-      + '?subject=' + encodeURIComponent('Winnow — ' + plan + ' plan')
-      + '&body=' + encodeURIComponent("Hi, I'd like to subscribe to the " + plan + " plan. Here's my org and preferred start date:");
-    return;
+async function openCheckout(plan) {
+  const userEmail = prompt("Enter your email for instant Winnow Pro access & receipt:", "");
+  if (!userEmail) return;
+  try {
+    const res = await fetch("/api/paystack-initialize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: userEmail,
+        amountXof: plan === 'pro' ? 25000 : 75000,
+        plan: "winnow_" + plan
+      }),
+    });
+    const data = await res.json();
+    if (data.authorization_url) {
+      window.location.href = data.authorization_url;
+    } else {
+      alert(data.error || "Initialization failed");
+    }
+  } catch (err) {
+    alert("Connection error with Paystack payment gateway.");
+  }
+}
   }
   Paddle.Checkout.open({
     settings: { locale: 'en', theme: 'dark', displayMode: 'overlay' },
