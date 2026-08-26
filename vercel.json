@@ -1,6 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/audit.mjs": { "maxDuration": 60 }
-  }
+    "api/audit.mjs": { "maxDuration": 60 },
+    "api/paystack-initialize.mjs": { "maxDuration": 30 },
+    "api/paystack-webhook.mjs": { "maxDuration": 30 }
+  },
+  "rewrites": [
+    { "source": "/api/paystack/initialize", "destination": "/api/paystack-initialize.mjs" },
+    { "source": "/api/paystack/webhook", "destination": "/api/paystack-webhook.mjs" }
+  ]
 }
