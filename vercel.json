@@ -1,6 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "alias": ["winnowcost.com", "www.winnowcost.com"],
+  "git": {
+    "deploymentEnabled": false
+  },
   "functions": {
     "api/audit.mjs": { "maxDuration": 60 },
     "api/paystack-initialize.mjs": { "maxDuration": 30 },

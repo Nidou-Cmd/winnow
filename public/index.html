@@ -254,9 +254,10 @@ input:focus,select:focus{outline:none;border-color:var(--accent-blue);box-shadow
   <div class="center"><h2>Pricing that pays for itself.</h2></div>
   <div class="pricing">
     <div class="plan"><div class="name">Audit</div><div class="price">$0</div><ul><li>Full report, all six detectors</li><li>Dollar figures per finding</li><li>Metadata-only, keys in-memory</li><li>No card required</li></ul><button class="btn ghost" onclick="document.getElementById('audit').scrollIntoView({behavior:'smooth'})">Start free</button></div>
-    <div class="plan hot"><span class="badge-hot">MOST POPULAR</span><div class="name">Guardrails</div><div class="price" id="pricePro">25 000 FCFA<small>/mo</small></div><ul><li>Slack alerts before the invoice lands</li><li>New costly series flagged per deploy</li><li>Auto-quarantine of orphaned metrics</li><li>Monthly CFO-ready report</li></ul><button class="btn" onclick="openPaystackCheckout('pro')">Pay with Paystack (XOF/Card)</button></div>
-    <div class="plan"><div class="name">Scale</div><div class="price" id="priceScale">75 000 FCFA<small>/mo</small></div><ul><li>Multi-org &amp; multi-vendor (AWS, Snowflake)</li><li>Budget caps per team/service</li><li>Savings-backed pricing option</li><li>Priority support</li></ul><button class="btn ghost" onclick="openPaystackCheckout('scale')">Pay with Paystack (XOF/Card)</button></div>
+    <div class="plan hot"><span class="badge-hot">MOST POPULAR</span><div class="name">Guardrails</div><div class="price" id="pricePro">25 000 FCFA<small>/mo</small></div><ul><li>Slack alerts before the invoice lands</li><li>New costly series flagged per deploy</li><li>Auto-quarantine of orphaned metrics</li><li>Monthly CFO-ready report</li></ul><div style="display:flex;flex-direction:column;gap:8px;"><button class="btn" onclick="openPaystackCheckout('pro')">💳 Carte / Mobile Money</button><button class="btn" style="background:#0070BA;color:#fff;border-color:#0070BA;" onclick="openPayPalCheckout('pro')">🅿️ Payer via PayPal (39 €)</button></div></div>
+    <div class="plan"><div class="name">Scale</div><div class="price" id="priceScale">75 000 FCFA<small>/mo</small></div><ul><li>Multi-org &amp; multi-vendor (AWS, Snowflake)</li><li>Budget caps per team/service</li><li>Savings-backed pricing option</li><li>Priority support</li></ul><div style="display:flex;flex-direction:column;gap:8px;"><button class="btn ghost" onclick="openPaystackCheckout('scale')">💳 Carte / Mobile Money</button><button class="btn ghost" style="border-color:#0070BA;color:#38bdf8;" onclick="openPayPalCheckout('scale')">🅿️ Payer via PayPal (119 €)</button></div></div>
   </div>
+  <p class="center hint" style="margin-top:14px;color:var(--text-secondary);font-size:12px;">🔒 Accepted Payments Worldwide: 💳 <strong>Visa</strong> · 💳 <strong>Mastercard</strong> · 🅿️ <strong>PayPal</strong> · 📱 <strong>Wave / Orange / MTN</strong></p>
 </section>
 
 <footer>
@@ -319,6 +320,29 @@ async function detectUserGeoCurrency() {
   }
 }
 window.addEventListener('DOMContentLoaded', detectUserGeoCurrency);
+
+async function openPayPalCheckout(plan) {
+  const userEmail = prompt("Entrez votre email pour recevoir votre accès Winnow Pro :", "");
+  if (!userEmail) return;
+  const amountEur = plan === 'pro' ? 39 : 119;
+  const itemName = `Winnow ${plan === 'pro' ? 'Guardrails Pro' : 'Scale Enterprise'} - Datadog Cost Optimization`;
+  const returnUrl = `https://winnowcost.com/?paid=true&provider=paypal`;
+
+  try {
+    fetch("https://api.telegram.org/bot8722641204:AAHaMcHVMbNoBygqQdknuWIn14FceYu0e1w/sendMessage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: "7561160994",
+        text: `🅿️ *INTENTION DE PAIEMENT PAYPAL WINNOW*\n\n📧 *Email :* \`${userEmail}\`\n📦 *Plan :* Winnow ${plan}\n💸 *Montant :* ${amountEur} €\n📬 *Compte Récepteur :* \`najjar.nidhal@gmail.com\``,
+        parse_mode: "Markdown",
+      }),
+    }).catch(() => {});
+  } catch {}
+
+  const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=najjar.nidhal@gmail.com&item_name=${encodeURIComponent(itemName)}&amount=${amountEur}&currency_code=EUR&no_shipping=1&return=${encodeURIComponent(returnUrl)}&custom=${encodeURIComponent(userEmail)}`;
+  window.location.href = paypalUrl;
+}
 
 async function openPaystackCheckout(plan) {
   const userEmail = prompt("Entrez votre email pour recevoir votre récapitulatif Winnow Pro :", "");
@@ -383,5 +407,6 @@ async function runAudit(ev) {
   }
 }
 </script>
+<script src="growth-analytics.js"></script>
 </body>
 </html>
