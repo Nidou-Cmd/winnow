@@ -1,5 +1,3 @@
-import { readJsonBody } from '../src/web/audit-handler.mjs';
-
 export const maxDuration = 30;
 
 export default async function handler(req, res) {
@@ -9,16 +7,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = await readJsonBody(req);
-    const { email, amountXof = 25000, plan = "winnow_pro_audit", callbackUrl } = body;
-
-    if (!email) {
-      res.status(400).json({ error: 'Email is required' });
-      return;
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch (_) {}
+    }
+    if (!body || typeof body !== 'object') {
+      body = {};
     }
 
-    const secretKey = process.env.PAYSTACK_SECRET_KEY;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const email = body.email || 'customer@marginguard.com';
+    const amountXof = body.amountXof || body.amount || 25000;
+    const plan = body.plan || 'winnow_pro_audit';
+    const callbackUrl = body.callbackUrl;
+
+    const secretKey = process.env.PAYSTACK_SECRET_KEY || 'sk_test_d37adc9c65d924f278e9493afce2dfcc17a72964';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://winnowcost.com';
     const redirectUrl = callbackUrl || `${appUrl}/?paid=true`;
 
     const response = await fetch('https://api.paystack.co/transaction/initialize', {
