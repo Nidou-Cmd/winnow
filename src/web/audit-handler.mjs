@@ -25,12 +25,26 @@ export async function runAuditFromBody(body) {
   if (body.mode === 'mock') {
     snapshot = buildDemoSnapshot();
   } else {
-    const client = new DatadogClient({
-      apiKey: String(body.apiKey ?? ''),
-      appKey: String(body.appKey ?? ''),
-      site: String(body.site ?? 'datadoghq.com')
-    });
-    snapshot = await client.collectAll();
+    const rawApiKey = String(body.apiKey ?? '').trim();
+    const rawAppKey = String(body.appKey ?? '').trim();
+    const rawSite = String(body.site ?? 'datadoghq.com').trim().toLowerCase();
+
+    if (!rawApiKey || !rawAppKey) {
+      throw Object.assign(new Error("Clés API et Application Datadog requises pour l'audit réel."), { status: 400 });
+    }
+
+    try {
+      const client = new DatadogClient({
+        apiKey: rawApiKey,
+        appKey: rawAppKey,
+        site: rawSite
+      });
+      snapshot = await client.collectAll();
+    } catch (err) {
+      // Security: never leak raw API keys or internal stack traces to client
+      const safeMessage = err.message ? err.message.replace(/([a-f0-9]{20,})/gi, '***') : "Échec de connexion Datadog";
+      throw Object.assign(new Error(`Audit Datadog échoué : ${safeMessage}`), { status: err.status || 500 });
+    }
   }
   const pricing = createPricing({
     discountPercent: body.discountPercent ?? body.discount ?? 0,
@@ -44,3 +58,4 @@ export async function runAuditFromBody(body) {
     html: renderHtmlReport(audit)
   };
 }
+
