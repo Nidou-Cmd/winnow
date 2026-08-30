@@ -165,6 +165,16 @@ input:focus,select:focus{outline:none;border-color:var(--accent-blue);box-shadow
     <a class="btn ghost" href="#detect">See what we find</a>
   </div>
 
+  <!-- 3D Animated Interactive Interface Showcase -->
+  <div style="margin: 32px auto 24px; max-width: 900px; position: relative; perspective: 1000px;">
+    <div style="border-radius: 20px; overflow: hidden; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 20px 50px rgba(16, 185, 129, 0.25); transition: transform 0.4s ease, box-shadow 0.4s ease; position: relative;" onmousemove="const r = this.getBoundingClientRect(); const x = e.clientX - r.left - r.width/2; const y = e.clientY - r.top - r.height/2; this.style.transform = `perspective(1000px) rotateX(${-y/r.height*8}deg) rotateY(${x/r.width*8}deg) translateY(-4px)`;" onmouseleave="this.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';">
+      <img src="winnow_banner.jpg" alt="Winnow FinOps 3D Interface Showcase" style="width: 100%; height: auto; display: block;" />
+      <div style="position: absolute; bottom: 20px; right: 20px; background: rgba(9, 13, 22, 0.88); border: 1px solid #10B981; color: #34D399; font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: 99px; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);">
+        ✨ Interface 3D Winnow FinOps -$14,160/an Active
+      </div>
+    </div>
+  </div>
+
   <div class="mockup" id="mockup">
     <div class="mockup-head"><span>acme-demo · sample audit</span><span style="color:var(--accent)">● complete</span></div>
     <div class="mockup-stats">
