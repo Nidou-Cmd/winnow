@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "alias": ["winnowcost.com", "www.winnowcost.com"],
   "git": {
     "deploymentEnabled": true
   },
