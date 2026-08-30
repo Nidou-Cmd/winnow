@@ -1,4 +1,4 @@
-# Winnow
+# Winnow FinOps (Official Nidou-Cmd Production)
 
 **Séparer les signaux de la dépense : audit et réduction automatisée des factures Datadog.** Zéro dépendance Node.js (≥18).
 
