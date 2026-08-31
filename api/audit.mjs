@@ -205,8 +205,8 @@ export default async function handler(req, res) {
 
     // 3. Notification Telegram
     try {
-      const telegramToken = process.env.TELEGRAM_BOT_TOKEN || "8722641204:AAHaMcHVMbNoBygqQdknuWIn14FceYu0e1w";
-      const chatId = process.env.TELEGRAM_CHAT_ID || "7561160994";
+      const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
+      const chatId = process.env.TELEGRAM_CHAT_ID;
       if (telegramToken && chatId) {
         await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
           method: "POST",

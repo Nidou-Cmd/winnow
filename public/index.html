@@ -490,13 +490,12 @@ async function openPayPalCheckout(plan) {
   const returnUrl = `https://winnowcost.com/?paid=true&provider=paypal`;
 
   try {
-    fetch("https://api.telegram.org/bot8722641204:AAHaMcHVMbNoBygqQdknuWIn14FceYu0e1w/sendMessage", {
+    fetch("/api/audit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chat_id: "7561160994",
-        text: `🅿️ *INTENTION DE PAIEMENT PAYPAL WINNOW*\n\n📧 *Email :* \`${userEmail}\`\n📦 *Plan :* Winnow ${plan}\n💸 *Montant :* ${amountEur} €\n📬 *Compte Récepteur :* \`najjar.nidhal@gmail.com\``,
-        parse_mode: "Markdown",
+        email: userEmail,
+        intent: `Paiement PayPal Winnow ${plan} (${amountEur}€)`
       }),
     }).catch(() => {});
   } catch {}
