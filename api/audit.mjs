@@ -2,7 +2,7 @@ import { readJsonBody, runAuditFromBody } from '../src/web/audit-handler.mjs';
 
 export const maxDuration = 60;
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY || "re_CnCZpd7o_JkiESUd8gMKvuH32TQsmi5Ef";
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const ADMIN_EMAILS = ["nidhal.najjar3@gmail.com", "najjar.nidhal@gmail.com", "nidhal.najjar@gmail.com", "rahmamili2016@gmail.com"];
 
 export default async function handler(req, res) {
