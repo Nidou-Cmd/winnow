@@ -53,7 +53,12 @@ export async function runAuditFromBody(body) {
   const audit = runAudit(snapshot, pricing);
   return {
     totals: audit.totals,
-    findings: audit.findings.map((f) => ({ title: f.title, severity: f.severity })),
+    findings: audit.findings.map((f) => ({ title: f.title, severity: f.severity, category: f.category })),
+    cybersecurity: audit.cybersecurity,
+    gitops: audit.gitops,
+    aiSentry: audit.aiSentry,
+    complianceBundle: audit.complianceBundle,
+    executiveAiSummary: audit.executiveAiSummary,
     warnings: audit.warnings,
     html: renderHtmlReport(audit)
   };

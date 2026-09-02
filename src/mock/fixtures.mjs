@@ -1,8 +1,8 @@
 export function buildDemoSnapshot() {
   const attributionTopMetrics = [
-    { metric: 'app.checkout.abandoned_cart_value', seriesCount: 2400, tags: ['env', 'service', 'customer_id'] },
-    { metric: 'app.http.request_duration', seriesCount: 2000, tags: ['env', 'service', 'route'] },
-    { metric: 'app.search.query_length_ms', seriesCount: 1800, tags: ['env', 'service'] },
+    { metric: 'app.checkout.abandoned_cart_value', seriesCount: 2400, tags: ['env:prod', 'service:checkout', 'customer_id:usr_98124', 'user_email:customer.checkout@example.com'] },
+    { metric: 'app.http.request_duration', seriesCount: 2000, tags: ['env:prod', 'service:api', 'route:/v1/pay', 'auth_header:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkbWluIn0.s3cr3ts1gn4tur3'] },
+    { metric: 'app.search.query_length_ms', seriesCount: 1800, tags: ['env:prod', 'service:search', 'cloud_key:AKIAIOSFODNN7EXAMPLE'] },
     { metric: 'kubernetes.pod.cpu_usage', seriesCount: 1400, tags: ['env', 'pod_name', 'node'] },
     { metric: 'app.queue.depth_by_partition', seriesCount: 1500, tags: ['env', 'partition_id'] },
     { metric: 'trace.redis.command_duration', seriesCount: 1000, tags: ['env', 'service'] },

@@ -73,9 +73,15 @@ async function main() {
   if (discountPercent > 0) console.log(`  Discount     : ${discountPercent}% applied`);
   console.log(`  Est. bill    : ${usd(audit.totalBaselineUsd)}/mo`);
   console.log(`  Savings      : ${usd(audit.totals.monthlySavingsMinUsd)} - ${usd(audit.totals.monthlySavingsMaxUsd)}/mo (${audit.totals.percentOfBillMin}%-${audit.totals.percentOfBillMax}%)`);
+  if (audit.cybersecurity) {
+    console.log(`  Cyber Score  : ${audit.cybersecurity.postureGrade} (${audit.cybersecurity.securityScore}/100) | Leaks Detected: ${audit.cybersecurity.totalViolations}`);
+  }
+  if (audit.gitops) {
+    console.log(`  GitOps Fix   : ${audit.gitops.safeRulesCount} Terraform blocks generated (Safety Score: ${audit.gitops.safetyScore}%)`);
+  }
   console.log(`  Findings     : ${audit.findings.length}`);
   for (const f of audit.findings) {
-    console.log(`    [${f.severity.toUpperCase().padEnd(6)}] ${f.title} -> ${usd(f.estMonthlySavingsMin)}-${usd(f.estMonthlySavingsMax)}`);
+    console.log(`    [${f.severity.toUpperCase().padEnd(8)}] ${f.title} -> ${usd(f.estMonthlySavingsMin)}-${usd(f.estMonthlySavingsMax)}`);
   }
   console.log('');
   console.log(`  Report: ${file}`);

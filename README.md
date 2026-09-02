@@ -1,22 +1,30 @@
-# Winnow FinOps (Official Nidou-Cmd Production)
+# Winnow FinOps & Cyber Defense (Official Nidou-Cmd Production v2.0)
 
-**Séparer les signaux de la dépense : audit et réduction automatisée des factures Datadog.** Zéro dépendance Node.js (≥18).
+**Séparez les signaux de la dépense & neutralisez les fuites de secrets dans la télémétrie.**  
+Audit automatisé des coûts Datadog & AWS, Scanner DLP temps réel, et Remédiation GitOps (Terraform). Zéro dépendance Node.js (≥18).
 
-> Le nom : *winnow* = vanner, séparer le grain de l'ivraie. Winnow sépare les signaux qui comptent du gaspillage facturé — métriques custom jamais requêtées, logs sans exclusion filters, spans APM non échantillonnées, hosts de staging monitorés 24/7 (~30% d'une facture de 5–50K$/mois typique). Domaine cible : getwinnow.io
+> **Le nom :** *winnow* = vanner, séparer le grain de l'ivraie. Winnow sépare les signaux utiles du gaspillage financier tout en bloquant l'exfiltration de secrets cloud (clés AWS, tokens GitHub, PII) dans vos métriques et logs.
+
+### 🛡️ Les Nouveautés Cybersécurité & Enterprise v2.0 :
+- **Zero-Knowledge Crypto Vault :** Chiffrement enveloppe AES-256-GCM + BYOK (AWS KMS / Vault), destruction éphémère des clés en mémoire RAM (`Buffer.fill(0)`).
+- **Scanner DLP Télémétrie :** Détection proactive des clés AWS, tokens GitHub, JWT et données RGPD/PCI-DSS dans vos tags de métriques.
+- **Remédiation GitOps Zéro-Droit d'Écriture :** Génération automatique de Pull Requests Terraform / OpenTofu (aucun droit d'écriture requis).
+- **Registre Cryptographique Immuable (WORM) :** Preuve d'intégrité par chaîne de hachage SHA-256 (conforme SOC 2 Type II, ISO 27001, HIPAA).
+- **Mode In-VPC / Air-Gapped :** Exécution 100% locale dans votre réseau privé avec garantie Zéro-Exfiltration.
 
 ## Démarrage rapide
 
 ```bash
-# Audit démo avec données d'exemple (aucune clé requise)
-node bin/cli.mjs audit --mock --open=false
+# Audit FinOps & Cyber démo avec scan DLP (sans clé requise)
+npm run audit:cyber
 
-# Audit réel (lecture seule)
+# Audit réel en lecture seule
 $env:DD_API_KEY="..."; $env:DD_APP_KEY="..."
 node bin/cli.mjs audit --site=datadoghq.com
 
-# Serveur web (landing page + API)
-node bin/server.mjs
-# → http://127.0.0.1:3000  puis POST /api/audit {"mode":"mock"}
+# Serveur web interactif (Dashboard + CISO Center + API)
+npm start
+# → http://127.0.0.1:3000
 ```
 
 ## Déployer

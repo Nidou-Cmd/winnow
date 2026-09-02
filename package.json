@@ -1,13 +1,15 @@
 {
   "name": "winnow",
-  "version": "1.1.0",
-  "description": "Audit and continuously cut Datadog observability bills. Zero-dependency Node.js.",
+  "version": "2.0.0",
+  "description": "Zero-Knowledge Observability FinOps & Telemetry Cyber Defense (Datadog & Multi-Cloud). Zero dependencies.",
   "type": "module",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
     "audit:mock": "node bin/cli.mjs audit --mock --open=false",
+    "audit:cyber": "node bin/cli.mjs audit --mock",
+    "test": "node bin/cli.mjs audit --mock --open=false",
     "demo": "node bin/cli.mjs audit --mock",
     "start": "node bin/server.mjs"
   },
