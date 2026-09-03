@@ -310,6 +310,14 @@ input:focus,select:focus{outline:none;border-color:var(--accent-blue);box-shadow
       <label>Application key</label>
       <input id="appKey" type="password" placeholder="DD_APP_KEY" autocomplete="off"/>
     </div>
+    <label>Contract Enterprise Discount (EDP / Commit)</label>
+    <select id="discount">
+      <option value="0">0% — Datadog List Price (Standard)</option>
+      <option value="15">15% — Growth Tier Contract</option>
+      <option value="25">25% — Scale Enterprise Commit</option>
+      <option value="35">35% — High-Volume Annual Commit</option>
+      <option value="50">50% — Strategic Fortune 500 Agreement</option>
+    </select>
     <p class="hint">Keys are held in memory for this audit only and never stored.</p>
     <button class="btn" type="submit" id="go" style="width:100%;margin-top:20px;justify-content:center">Generate my report</button>
   </form>
@@ -585,7 +593,8 @@ async function runAudit(ev) {
         mode: document.getElementById('mode').value,
         site: document.getElementById('site') ? document.getElementById('site').value : undefined,
         apiKey: document.getElementById('apiKey') ? document.getElementById('apiKey').value : undefined,
-        appKey: document.getElementById('appKey') ? document.getElementById('appKey').value : undefined
+        appKey: document.getElementById('appKey') ? document.getElementById('appKey').value : undefined,
+        discountPercent: Number(document.getElementById('discount')?.value || 0)
       })
     });
     const data = await res.json();

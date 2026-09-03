@@ -145,6 +145,7 @@ export function runAudit(snapshot, pricing = defaultPricing) {
     totals,
     cybersecurity: dlpResult,
     executiveAiSummary: `Winnow Cyber & FinOps Intelligence: Security Grade: ${dlpResult.postureGrade} (${dlpResult.securityScore}/100). Identified $${monthlyMax.toLocaleString()}/mo ($${annualMax.toLocaleString()}/yr) in Datadog waste (~${percentMax}% of invoice) + ${dlpResult.totalViolations} telemetry data leaks quarantined.`,
+    pricing,
     warnings: snapshot.warnings ?? []
   };
 

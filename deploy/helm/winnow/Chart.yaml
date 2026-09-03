@@ -1,0 +1,15 @@
+apiVersion: v2
+name: winnow-enterprise
+description: Winnow Zero-Trust Observability FinOps & Telemetry DLP In-VPC Agent
+type: application
+version: 2.0.0
+appVersion: "2.0.0"
+keywords:
+  - finops
+  - datadog
+  - cybersecurity
+  - dlp
+  - opentelemetry
+maintainers:
+  - name: Nidou-Cmd
+    email: nidhal.najjar@gmail.com

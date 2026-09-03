@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  winnow-runner:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: winnow-in-vpc-runner
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
+      - IN_VPC_MODE=true
+      - ZERO_DATA_EXFILTRATION=true
+      - WINNOW_STORAGE_PATH=/data/audit-ledger.jsonl
+    volumes:
+      - winnow-ledger-data:/data
+    networks:
+      - winnow-private-net
+
+  otel-dlp-proxy:
+    image: otel/opentelemetry-collector-contrib:0.95.0
+    container_name: winnow-otel-dlp-sanitizer
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel/collector-dlp-pipeline.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+    networks:
+      - winnow-private-net
+
+volumes:
+  winnow-ledger-data:
+    driver: local
+
+networks:
+  winnow-private-net:
+    internal: false

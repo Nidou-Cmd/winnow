@@ -1,0 +1,58 @@
+# ==============================================================================
+# WINNOW IN-VPC TELEMETRY SANITIZER & DLP STREAM PROXY
+# Sits inline before Datadog/CloudWatch to strip secrets and toxic cardinality
+# ==============================================================================
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+  # Real-Time Telemetry DLP: Scrubs secrets before they reach the cloud
+  redaction:
+    allow_all_keys: true
+    blocked_values:
+      - "AKIA[0-9A-Z]{16}"                    # AWS Access Keys
+      - "ghp_[a-zA-Z0-9]{36}"                 # GitHub Personal Access Tokens
+      - "Bearer eyJ[a-zA-Z0-9_-]+"            # JWT Tokens
+      - "-----BEGIN [A-Z]+ PRIVATE KEY-----"   # Private Cryptographic Keys
+    summary: silent
+
+  # High-Cardinality Tamer: Drops ephemeral UUIDs and customer IDs from tags
+  transform:
+    metric_statements:
+      - context: datapoint
+        statements:
+          - delete_key(attributes, "customer_id")
+          - delete_key(attributes, "session_id")
+          - delete_key(attributes, "pod_name")
+
+exporters:
+  # Forward sanitized metrics and logs to Datadog
+  datadog:
+    api:
+      key: "${env:DD_API_KEY}"
+      site: "${env:DD_SITE}"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [transform, batch]
+      exporters: [datadog]
+    logs:
+      receivers: [otlp]
+      processors: [redaction, batch]
+      exporters: [datadog]
+    traces:
+      receivers: [otlp]
+      processors: [redaction, batch]
+      exporters: [datadog]

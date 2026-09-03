@@ -139,7 +139,7 @@ export function renderHtmlReport(audit) {
 <div class="hero">
   <div class="stat"><div class="big">${usd(t.monthlySavingsMinUsd)}–${usd(t.monthlySavingsMaxUsd)}</div><div class="lbl">Économies récupérables / mois</div></div>
   <div class="stat"><div class="big">${usd(t.annualizedSavingsMaxUsd)}</div><div class="lbl">Économies annuelles projetées</div></div>
-  <div class="stat"><div class="big">${t.percentOfBillMin}%–${t.percentOfBillMax}%</div><div class="lbl">De la facture estimée (${usd(audit.totalBaselineUsd)}/mo)</div></div>
+  <div class="stat"><div class="big">${t.percentOfBillMin}%–${t.percentOfBillMax}%</div><div class="lbl">De la facture estimée (${usd(audit.totalBaselineUsd)}/mo) ${audit.pricing?.discountPercent > 0 ? `<br><small style="color:var(--accent);font-size:11px;">Remise contrat EDP : ${audit.pricing.discountPercent}%</small>` : '<br><small style="color:var(--dim);font-size:11px;">Tarif catalogue 0%</small>'}</div></div>
   <div class="stat"><div class="big" style="color:${cyber.securityScore >= 80 ? 'var(--accent)' : 'var(--rose)'}">${esc(cyber.postureGrade)} (${cyber.securityScore}/100)</div><div class="lbl">Score de Sécurité &amp; DLP</div></div>
 </div>
 
