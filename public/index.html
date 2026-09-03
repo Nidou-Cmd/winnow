@@ -13,32 +13,55 @@
   --bg-canvas:#070B16;--bg-surface:#0F172A;--bg-elevated:#1E293B;
   --border-subtle:rgba(255,255,255,0.08);--border-strong:rgba(56,189,248,0.3);
   --text-primary:#F8FAFC;--text-secondary:#94A3B8;--text-tertiary:#64748B;
-  --accent:#10B981;--accent-hover:#34D399;--accent-blue:#38BDF8;--accent-purple:#8B5CF6;
+  --accent:#10B981;--accent-hover:#34D399;--accent-blue:#38BDF8;--accent-purple:#A855F7;
   --sev-high:#F43F5E;--sev-medium:#F59E0B;--sev-low:#38BDF8;
   --ease:cubic-bezier(0.16,1,0.3,1);
   --font-display:'Plus Jakarta Sans',sans-serif;--font-text:'Inter',sans-serif;--font-mono:'JetBrains Mono',monospace;
+  --card-shadow:0 32px 80px -24px rgba(0,0,0,.7);
+  --nav-bg:rgba(7,11,22,0.85);
+  --input-bg:#080D1A;
 }
+
+[data-theme="light"]{
+  --bg-canvas:#F8FAFC;--bg-surface:#FFFFFF;--bg-elevated:#F1F5F9;
+  --border-subtle:#E2E8F0;--border-strong:rgba(14,165,233,0.35);
+  --text-primary:#0F172A;--text-secondary:#475569;--text-tertiary:#64748B;
+  --accent:#059669;--accent-hover:#10B981;--accent-blue:#0284C7;--accent-purple:#9333EA;
+  --card-shadow:0 16px 36px -12px rgba(0,0,0,.08);
+  --nav-bg:rgba(255,255,255,0.92);
+  --input-bg:#F8FAFC;
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{
   background:var(--bg-canvas);color:var(--text-primary);font:16px/1.6 var(--font-text);
   -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  transition:background 0.3s ease, color 0.3s ease;
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(56,189,248,0.12), transparent 70%),
     radial-gradient(ellipse 60% 50% at 90% 90%, rgba(16,185,129,0.08), transparent 60%);
 }
+
+[data-theme="light"] body{
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(14,165,233,0.08), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 90% 90%, rgba(5,150,105,0.06), transparent 60%);
+}
+
 ::selection{background:var(--accent);color:#04120C}
 a{color:inherit;text-decoration:none}
 .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 
-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:16px 5vw;background:rgba(7,11,22,0.8);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-subtle);transition:.3s var(--ease)}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:16px 5vw;background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-subtle);transition:.3s var(--ease)}
 .logo{font-family:var(--font-display);font-weight:800;font-size:20px;letter-spacing:-.02em;color:var(--text-primary)}
 .logo b{color:var(--accent-blue)}
 .nav-actions{display:flex;gap:12px;align-items:center}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg, var(--accent), #059669);color:#04120C;font-weight:700;font-size:14.5px;padding:12px 24px;border-radius:12px;border:none;cursor:pointer;font-family:var(--font-display);transition:transform .18s var(--ease),filter .18s var(--ease);white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg, var(--accent), #059669);color:#FFFFFF;font-weight:700;font-size:14.5px;padding:12px 24px;border-radius:12px;border:none;cursor:pointer;font-family:var(--font-display);transition:transform .18s var(--ease),filter .18s var(--ease);white-space:nowrap}
 .btn:hover{filter:brightness(1.15);transform:translateY(-1px)}
 .btn:active{transform:scale(.97)}
 .btn.ghost{background:rgba(255,255,255,0.05);color:var(--text-primary);border:1px solid var(--border-strong)}
+[data-theme="light"] .btn.ghost{background:#F1F5F9;color:#0F172A;border-color:#CBD5E1}
 .btn.ghost:hover{background:var(--bg-elevated)}
 
 section{max-width:1160px;margin:0 auto;padding:80px 24px}
@@ -54,10 +77,127 @@ h2{font-family:var(--font-display);font-weight:800;font-size:clamp(26px,3.8vw,40
 .hero .sub{margin:0 auto 32px}
 .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 
-.mockup{position:relative;max-width:800px;margin:52px auto 0;text-align:left;background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:20px;padding:24px 28px;box-shadow:0 32px 80px -24px rgba(0,0,0,.7)}
+.mockup{position:relative;max-width:800px;margin:52px auto 0;text-align:left;background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:20px;padding:24px 28px;box-shadow:var(--card-shadow)}
 .mockup-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--border-subtle);font-size:12px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
 .mockup-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;padding:20px 0}
 .stat .v{font-family:var(--font-mono);font-weight:700;font-size:clamp(20px,2.5vw,28px);color:var(--accent)}
+.stat .l{font-size:13px;color:var(--text-secondary);margin-top:4px}
+.mrow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--border-subtle);font-size:13.5px}
+.mrow .dot{width:8px;height:8px;border-radius:99px;display:inline-block;margin-right:10px;flex-shrink:0}
+.mrow .t{flex:1;color:var(--text-primary)}
+.mrow .m{font-family:var(--font-mono);color:var(--accent);font-weight:600}
+
+.strip{background:var(--bg-surface);border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);padding:18px 24px;display:flex;justify-content:space-around;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--text-secondary);font-weight:500}
+.strip span{display:inline-flex;align-items:center;gap:8px}
+
+.bento{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-top:48px}
+.tile{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:20px;padding:32px;position:relative;transition:transform .2s var(--ease),border-color .2s var(--ease);box-shadow:var(--card-shadow)}
+.tile:hover{transform:translateY(-2px);border-color:var(--border-strong)}
+.tile h3{font-family:var(--font-display);font-size:20px;font-weight:700;margin:12px 0 8px}
+.tile p{color:var(--text-secondary);font-size:14px;line-height:1.6}
+.tile .sevline{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary)}
+.tile .save{margin-left:auto;font-family:var(--font-mono);color:var(--accent);font-weight:600}
+.tile code{display:block;margin-top:16px;background:var(--bg-elevated);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--accent-blue);overflow-x:auto}
+
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
+.step{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:20px;padding:32px;box-shadow:var(--card-shadow)}
+.step .n{font-family:var(--font-mono);font-size:13px;color:var(--accent);font-weight:700;letter-spacing:.1em;display:inline-block;margin-bottom:16px}
+.step h3{font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:10px}
+.step p{color:var(--text-secondary);font-size:14px;line-height:1.6}
+
+.calc{background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:24px;padding:48px;max-width:760px;margin:40px auto 0;text-align:center;box-shadow:var(--card-shadow)}
+.bill-val{font-family:var(--font-mono);font-size:clamp(36px,5vw,56px);font-weight:800;color:var(--accent);margin:16px 0}
+input[type=range]{width:100%;height:8px;border-radius:4px;background:var(--bg-elevated);outline:none;-webkit-appearance:none;accent-color:var(--accent);cursor:pointer}
+.calc-range{display:flex;justify-content:space-between;color:var(--text-tertiary);font-size:12px;font-family:var(--font-mono);margin-top:8px}
+.calc-out{margin-top:36px;padding-top:32px;border-top:1px solid var(--border-subtle)}
+.calc-out .big{font-family:var(--font-mono);font-size:clamp(28px,4vw,44px);font-weight:800;color:var(--accent)}
+.calc-out .lbl{color:var(--text-secondary);font-size:14px;margin-top:6px}
+
+form.audit{background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:24px;padding:40px;max-width:680px;margin:40px auto 0;box-shadow:var(--card-shadow)}
+form.audit label{display:block;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;text-align:left}
+form.audit input,form.audit select,form.audit textarea{width:100%;padding:12px 16px;background:var(--input-bg);border:1px solid var(--border-subtle);border-radius:10px;color:var(--text-primary);font:14px var(--font-text);outline:none;margin-bottom:18px;transition:border-color .18s var(--ease)}
+form.audit input:focus,form.audit select:focus,form.audit textarea:focus{border-color:var(--accent)}
+form.audit .hint{font-size:12px;color:var(--text-tertiary);text-align:left;margin-top:-10px;margin-bottom:18px}
+
+.pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
+.plan{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:24px;padding:36px 28px;position:relative;display:flex;flex-direction:column;box-shadow:var(--card-shadow)}
+.plan.hot{border-color:var(--accent);background:linear-gradient(180deg,rgba(16,185,129,0.06),var(--bg-surface))}
+.badge-hot{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#04120C;font-size:11px;font-weight:800;padding:4px 12px;border-radius:99px;letter-spacing:.08em;font-family:var(--font-display)}
+.plan .name{font-family:var(--font-display);font-size:20px;font-weight:700}
+.plan .price{font-family:var(--font-mono);font-size:36px;font-weight:800;color:var(--text-primary);margin:16px 0 24px}
+.plan .price small{font-size:14px;color:var(--text-secondary);font-weight:500}
+.plan ul{list-style:none;margin-bottom:32px;flex:1}
+.plan li{font-size:14px;color:var(--text-secondary);padding:8px 0;display:flex;align-items:center;gap:10px}
+.plan li::before{content:"✓";color:var(--accent);font-weight:800}
+
+@media(max-width:768px){
+  .hero{padding-top:110px}
+  .bento{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pricing{grid-template-columns:1fr!important;gap:16px}
+  .plan{padding:24px 20px;border-radius:16px}
+  .mrow{font-size:12px;flex-direction:column;align-items:flex-start;gap:4px}
+  .mrow .m{width:100%;text-align:left;margin-top:2px}
+  .calc{padding:24px 14px;border-radius:16px}
+  form.audit{padding:24px 16px;border-radius:16px}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="logo">win<b>now</b></div>
+  <div class="nav-actions">
+    <button id="themeToggleBtn" class="btn ghost" onclick="toggleTheme()" style="padding:7px 14px;font-size:12.5px;border-radius:10px;cursor:pointer;" aria-label="Changer de thème">☀️ Mode Clair</button>
+    <a class="btn ghost" href="#pricing">Pricing</a>
+    <button class="btn" onclick="document.getElementById('audit').scrollIntoView({behavior:'smooth'})">Run Audit</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <span class="kicker"><i></i>🔒 Zero-Credential Option Available · Zero-Server Enclave™ · 0 Write-Privilege Required</span>
+  <h1>Find the money hiding<br/>in your <span class="grad">Datadog</span> bill.</h1>
+  <p class="sub">Series A–B teams burn $5K–50K/month on observability — up to a third of it on metrics nobody queries and logs nobody reads. We quantify the waste in dollars, in minutes — <strong>with zero credentials required</strong> or via our in-browser cryptographic enclave.</p>
+  
+  <!-- 3 BADGES DE CONFIANCE MAJEURS DÈS LE HERO HEADER -->
+  <div class="hero-trust-cards" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; max-width:980px; margin:28px auto 32px; text-align:left;">
+    
+    <div style="background:var(--bg-surface); border:1.5px solid rgba(16,185,129,0.45); border-radius:16px; padding:18px 20px; box-shadow:var(--card-shadow); transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <span style="font-size:24px;">📄</span>
+        <strong style="color:var(--accent); font-size:15px; font-family:var(--font-display);">Mode Zéro-Clé : Import Terraform Offline</strong>
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); line-height:1.5;">
+        <strong>Zéro accès cloud requis.</strong> Glissez-déposez vos fichiers <code style="background:var(--bg-elevated); padding:2px 6px; border-radius:4px; font-size:12px; color:var(--accent-blue);">.tf</code> pour un audit 100% hors-ligne sans fournir aucun identifiant.
+      </div>
+    </div>
+
+    <div style="background:var(--bg-surface); border:1.5px solid rgba(56,189,248,0.45); border-radius:16px; padding:18px 20px; box-shadow:var(--card-shadow); transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <span style="font-size:24px;">🛡️</span>
+        <strong style="color:var(--accent-blue); font-size:15px; font-family:var(--font-display);">Zero-Server Enclave™ : Clés isolées dans la RAM</strong>
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); line-height:1.5;">
+        <strong>Détruites par WebCrypto.</strong> Exécuté en mémoire vive dans votre navigateur et déchiqueté instantanément via <code style="background:var(--bg-elevated); padding:2px 6px; border-radius:4px; font-size:12px; color:var(--accent-blue);">crypto.getRandomValues</code>.
+      </div>
+    </div>
+
+    <div style="background:var(--bg-surface); border:1.5px solid rgba(168,85,247,0.45); border-radius:16px; padding:18px 20px; box-shadow:var(--card-shadow); transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <span style="font-size:24px;">⚡</span>
+        <strong style="color:var(--accent-purple); font-size:15px; font-family:var(--font-display);">Zéro Droit d'Écriture : 100% GitOps Safe PR</strong>
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); line-height:1.5;">
+        <strong>Aucun risque pour la production.</strong> Winnow ne touche jamais à vos métriques : nous générons la Pull Request Terraform prête à fusionner.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="hero-actions">
+    <button class="btn" onclick="document.getElementById('audit').scrollIntoView({behavior:'smooth'})">Démarrer l'audit gratuit →</button>
+    <a class="btn ghost" href="#security-comparison">Pourquoi les CISOs nous choisissent</a>
+  </div>
 .stat .l{color:var(--text-tertiary);font-size:12px;margin-top:2px}
 .mrow{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--border-subtle);font-size:13.5px}
 .dot{width:8px;height:8px;border-radius:99px;flex:none}
@@ -626,8 +766,31 @@ async function detectUserGeoCurrency() {
   } catch (e) {
     console.log('[MarginGuard GeoIP]: Using default XOF / FCFA currency');
   }
+// Theme Toggle Engine (Light / Dark Mode)
+function initTheme() {
+  const saved = localStorage.getItem('winnow_theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeButton(saved);
 }
-window.addEventListener('DOMContentLoaded', detectUserGeoCurrency);
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('winnow_theme', next);
+  updateThemeButton(next);
+}
+
+function updateThemeButton(theme) {
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) {
+    btn.innerHTML = theme === 'dark' ? '☀️ Mode Clair' : '🌙 Mode Sombre';
+  }
+}
+window.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  detectUserGeoCurrency();
+});
 
 async function openPayPalCheckout(plan) {
   const userEmail = prompt("Entrez votre email pour recevoir votre accès Winnow Pro :", "");
