@@ -292,34 +292,63 @@ input:focus,select:focus{outline:none;border-color:var(--accent-blue);box-shadow
 </section>
 
 <section id="audit">
-  <div class="center"><h2>Run your free audit.</h2></div>
+  <div class="center">
+    <h2>Run your free audit.</h2>
+    <p style="color:var(--text-secondary);font-size:14px;margin-top:4px;">Choisissez votre niveau de sécurité : Zéro clé requise avec vos fichiers Terraform, ou analyse en direct.</p>
+  </div>
+  
   <form class="audit" onsubmit="runAudit(event)">
-    <label>Audit mode</label>
-    <select id="mode">
-      <option value="mock">Demo — sample data, no credentials</option>
-      <option value="live">My real Datadog org (read-only)</option>
+    <label>Mode d'audit &amp; Niveau de confiance</label>
+    <select id="mode" onchange="updateAuditModeView()">
+      <option value="terraform" selected>📄 ZÉRO-CLÉ : Fichier Terraform Datadog (Recommandé CISO)</option>
+      <option value="live">🛡️ IN-BROWSER : API Datadog en direct (Zéro exfiltration serveur)</option>
+      <option value="mock">⚡ DÉMO : Échantillon représentatif ($8,100/mo)</option>
     </select>
-    <div id="creds" style="display:none">
+
+    <!-- MODE 1 : TERRAFORM ZERO-KEY -->
+    <div id="tfBox" style="margin-top:14px;">
+      <label>Collez votre code Terraform Datadog (.tf) ou déposez le fichier</label>
+      <textarea id="tfInput" rows="6" placeholder='resource "datadog_logs_index" "prod" {
+  name = "production"
+  query = "env:prod"
+  num_retention_days = 30
+}' style="width:100%;background:#080D1A;border:1px solid var(--line);border-radius:8px;padding:12px;color:#F8FAFC;font-family:'JetBrains Mono',monospace;font-size:12px;resize:vertical;"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+        <span style="font-size:11px;color:#10B981;font-weight:700;">✔ 100% Hors-Ligne · Aucune clé API ni accès cloud requis</span>
+        <input type="file" id="tfFile" accept=".tf,.hcl,.txt" style="display:none" onchange="handleTfFileLoad(event)"/>
+        <button type="button" class="btn ghost" style="padding:4px 10px;font-size:11px;" onclick="document.getElementById('tfFile').click()">📂 Charger un fichier .tf</button>
+      </div>
+    </div>
+
+    <!-- MODE 2 : LIVE DATADOG -->
+    <div id="creds" style="display:none;margin-top:14px;">
+      <div style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#38BDF8;">
+        🔒 <strong>Garantie In-Browser :</strong> Vos clés sont utilisées en mémoire vive pour cet audit et immédiatement détruites par déchiquetage RAM (WebCrypto).
+      </div>
       <label>Datadog site</label>
       <select id="site">
         <option>datadoghq.com</option><option>us3.datadoghq.com</option><option>us5.datadoghq.com</option>
         <option>datadoghq.eu</option><option>ap1.datadoghq.com</option>
       </select>
       <label>API key</label>
-      <input id="apiKey" type="password" placeholder="DD_API_KEY" autocomplete="off"/>
+      <input id="apiKey" type="password" placeholder="DD_API_KEY (read-only)" autocomplete="off"/>
       <label>Application key</label>
-      <input id="appKey" type="password" placeholder="DD_APP_KEY" autocomplete="off"/>
+      <input id="appKey" type="password" placeholder="DD_APP_KEY (read-only)" autocomplete="off"/>
     </div>
-    <label>Contract Enterprise Discount (EDP / Commit)</label>
+
+    <label style="margin-top:14px;">Remise Entreprise Négociée (EDP / Commit)</label>
     <select id="discount">
-      <option value="0">0% — Datadog List Price (Standard)</option>
-      <option value="15">15% — Growth Tier Contract</option>
-      <option value="25">25% — Scale Enterprise Commit</option>
-      <option value="35">35% — High-Volume Annual Commit</option>
-      <option value="50">50% — Strategic Fortune 500 Agreement</option>
+      <option value="0">0% — Tarif Catalogue Datadog Standard</option>
+      <option value="15">15% — Contrat Growth</option>
+      <option value="25" selected>25% — Contrat Scale Enterprise</option>
+      <option value="35">35% — Contrat Volume Annuel</option>
+      <option value="50">50% — Accord Stratégique Fortune 500</option>
     </select>
-    <p class="hint">Keys are held in memory for this audit only and never stored.</p>
-    <button class="btn" type="submit" id="go" style="width:100%;margin-top:20px;justify-content:center">Generate my report</button>
+
+    <button class="btn" type="submit" id="go" style="width:100%;margin-top:20px;justify-content:center">Générer mon Rapport d'Audit</button>
+    <button type="button" class="btn ghost" onclick="if(window.WinnowTrustEngine)window.WinnowTrustEngine.showSecurityInspector()" style="width:100%;margin-top:10px;font-size:12px;justify-content:center;">
+      🛡️ Inspecter le Code Source Client (CISO Proof)
+    </button>
   </form>
   <div id="result" role="status" aria-live="polite"></div>
 </section>
@@ -580,23 +609,70 @@ async function openPaystackCheckout(plan) {
   }
 }
 
+function updateAuditModeView() {
+  const mode = document.getElementById('mode').value;
+  const tfBox = document.getElementById('tfBox');
+  const creds = document.getElementById('creds');
+  if (mode === 'terraform') {
+    if (tfBox) tfBox.style.display = 'block';
+    if (creds) creds.style.display = 'none';
+  } else if (mode === 'live') {
+    if (tfBox) tfBox.style.display = 'none';
+    if (creds) creds.style.display = 'block';
+  } else {
+    if (tfBox) tfBox.style.display = 'none';
+    if (creds) creds.style.display = 'none';
+  }
+}
+
+function handleTfFileLoad(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('tfInput').value = e.target.result;
+    alert(`✅ Fichier ${file.name} chargé (${Math.round(file.size/1024)} KB)`);
+  };
+  reader.readAsText(file);
+}
+
 async function runAudit(ev) {
   ev.preventDefault();
   const btn = document.getElementById('go');
   const out = document.getElementById('result');
+  const mode = document.getElementById('mode').value;
   btn.disabled = true; btn.textContent = 'Auditing…'; out.style.display = 'none';
   try {
+    const payload = {
+      mode,
+      discountPercent: Number(document.getElementById('discount')?.value || 0)
+    };
+
+    if (mode === 'terraform') {
+      const tfContent = document.getElementById('tfInput')?.value || '';
+      if (!tfContent.trim()) {
+        alert("Veuillez coller votre code Terraform Datadog ou charger un fichier .tf");
+        return;
+      }
+      payload.terraformHcl = tfContent;
+    } else if (mode === 'live') {
+      payload.site = document.getElementById('site') ? document.getElementById('site').value : 'datadoghq.com';
+      payload.apiKey = document.getElementById('apiKey') ? document.getElementById('apiKey').value : undefined;
+      payload.appKey = document.getElementById('appKey') ? document.getElementById('appKey').value : undefined;
+    }
+
     const res = await fetch('/api/audit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        mode: document.getElementById('mode').value,
-        site: document.getElementById('site') ? document.getElementById('site').value : undefined,
-        apiKey: document.getElementById('apiKey') ? document.getElementById('apiKey').value : undefined,
-        appKey: document.getElementById('appKey') ? document.getElementById('appKey').value : undefined,
-        discountPercent: Number(document.getElementById('discount')?.value || 0)
-      })
+      body: JSON.stringify(payload)
     });
+
+    // Zero out memory immediately if live keys were used
+    if (mode === 'live' && window.WinnowTrustEngine) {
+      window.WinnowTrustEngine.shredMemoryBuffer(payload.apiKey);
+      window.WinnowTrustEngine.shredMemoryBuffer(payload.appKey);
+    }
+
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Audit failed');
     const lo = '$' + Math.round(data.totals.monthlySavingsMinUsd).toLocaleString();
@@ -610,7 +686,7 @@ async function runAudit(ev) {
       <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56,189,248,0.4); border-radius: 16px; padding: 20px; text-align: left; margin-top: 16px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px;">
           <div>
-            <span style="color:#38BDF8; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em;">Audit &amp; Cyber Scan Complete</span>
+            <span style="color:#38BDF8; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em;">${mode === 'terraform' ? 'Audit Terraform Zéro-Clé Réussi' : 'Audit &amp; Cyber Scan Complete'}</span>
             <div style="font-size:20px; font-weight:800; color:#F8FAFC; margin-top:2px;">
               ${lo} – ${hi} <span style="font-size:13px; color:#94A3B8; font-weight:400;">/mois récupérables</span>
             </div>
@@ -642,10 +718,11 @@ async function runAudit(ev) {
       </div>
     `;
   } finally {
-    btn.disabled = false; btn.textContent = 'Generate my report';
+    btn.disabled = false; btn.textContent = 'Générer mon Rapport d\'Audit';
   }
 }
 </script>
+<script src="in-browser-audit.js"></script>
 <script src="growth-analytics.js"></script>
 </body>
 </html>

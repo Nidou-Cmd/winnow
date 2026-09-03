@@ -22,7 +22,11 @@ export async function runAuditFromBody(body) {
   }
 
   let snapshot;
-  if (body.mode === 'mock') {
+  if (body.mode === 'terraform' || body.terraformHcl || body.tfContent) {
+    const { parseTerraformDatadogManifest } = await import('../parsers/terraform-parser.mjs');
+    const parsed = parseTerraformDatadogManifest(body.terraformHcl || body.tfContent || '');
+    snapshot = parsed.snapshot;
+  } else if (body.mode === 'mock') {
     snapshot = buildDemoSnapshot();
   } else {
     const rawApiKey = String(body.apiKey ?? '').trim();
