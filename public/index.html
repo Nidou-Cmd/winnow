@@ -157,12 +157,26 @@ input:focus,select:focus{outline:none;border-color:var(--accent-blue);box-shadow
 </nav>
 
 <section class="hero">
-  <span class="kicker"><i></i>Read-only · Metadata only · 2 minutes</span>
+  <span class="kicker"><i></i>🔒 Zero-Credential Option Available · Zero-Server Enclave™ · 0 Write-Privilege Required</span>
   <h1>Find the money hiding<br/>in your <span class="grad">Datadog</span> bill.</h1>
-  <p class="sub">Series A–B teams burn $5K–50K/month on observability — up to a third of it on metrics nobody queries and logs nobody reads. We quantify the waste in dollars, in minutes.</p>
+  <p class="sub">Series A–B teams burn $5K–50K/month on observability — up to a third of it on metrics nobody queries and logs nobody reads. We quantify the waste in dollars, in minutes — <strong>with zero credentials required</strong> or via our in-browser cryptographic enclave.</p>
+  
+  <!-- Institutional Trust Pills -->
+  <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin:18px 0 24px;">
+    <span style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#34D399; font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; display:inline-flex; align-items:center; gap:6px;">
+      📄 <strong>Mode Zéro-Clé :</strong> Import Terraform Offline
+    </span>
+    <span style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); color:#38BDF8; font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; display:inline-flex; align-items:center; gap:6px;">
+      🛡️ <strong>Zero-Server Enclave™ :</strong> Clés isolées dans votre RAM
+    </span>
+    <span style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); color:#C084FC; font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; display:inline-flex; align-items:center; gap:6px;">
+      ⚡ <strong>Zéro Droit d'Écriture :</strong> 100% GitOps Safe PR
+    </span>
+  </div>
+
   <div class="hero-actions">
-    <button class="btn" onclick="document.getElementById('audit').scrollIntoView({behavior:'smooth'})">Run my free audit →</button>
-    <a class="btn ghost" href="#detect">See what we find</a>
+    <button class="btn" onclick="document.getElementById('audit').scrollIntoView({behavior:'smooth'})">Démarrer l'audit gratuit →</button>
+    <a class="btn ghost" href="#security-comparison">Pourquoi les CISOs nous choisissent</a>
   </div>
 
   <!-- 3D Animated Interactive Interface Showcase -->
@@ -351,6 +365,60 @@ input:focus,select:focus{outline:none;border-color:var(--accent-blue);box-shadow
     </button>
   </form>
   <div id="result" role="status" aria-live="polite"></div>
+</section>
+
+<!-- SECTION INSTITUTIONNELLE CISO & COMPARAISON CONCURRENTIELLE -->
+<section id="security-comparison" style="margin-top: 60px; padding: 40px 0; border-top: 1px solid var(--line);">
+  <div class="center" style="margin-bottom: 32px;">
+    <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 99px; text-transform: uppercase;">
+      Architecturé pour les CISOs &amp; Banques
+    </span>
+    <h2 style="font-size: 28px; font-weight: 800; color: var(--text-primary); margin-top: 12px;">
+      Pourquoi les RSSI choisissent Winnow face aux outils traditionnels
+    </h2>
+    <p style="color: var(--text-secondary); font-size: 13.5px; max-width: 620px; margin: 8px auto 0;">
+      La plupart des outils FinOps exigent des accès IAM administrateur intrusifs. Winnow a été mathématiquement conçu pour éliminer tout risque d'exfiltration et de panne de production.
+    </p>
+  </div>
+
+  <div style="max-width: 860px; margin: 0 auto; background: var(--bg-surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+      <thead>
+        <tr style="background: rgba(15, 23, 42, 0.8); border-bottom: 2px solid var(--line);">
+          <th style="padding: 14px 18px; color: var(--text-secondary); font-size: 11px; text-transform: uppercase; font-weight: 800;">Critère de Sécurité &amp; Fiabilité</th>
+          <th style="padding: 14px 18px; color: #94A3B8; font-size: 11px; text-transform: uppercase; font-weight: 700;">Outils FinOps Traditionnels</th>
+          <th style="padding: 14px 18px; color: #10B981; font-size: 11px; text-transform: uppercase; font-weight: 800; background: rgba(16, 185, 129, 0.08);">Winnow Zero-Server Enclave™</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding: 14px 18px; font-weight: 700; color: var(--text-primary);">Niveau de Privilège Requis</td>
+          <td style="padding: 14px 18px; color: #F87171;">⚠️ Rôles IAM Administrateur &amp; Écriture directe</td>
+          <td style="padding: 14px 18px; color: #34D399; font-weight: 700; background: rgba(16, 185, 129, 0.04);">✔ Zéro Droit d'Écriture (GitOps PR-only)</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding: 14px 18px; font-weight: 700; color: var(--text-primary);">Exigence de Clés d'API</td>
+          <td style="padding: 14px 18px; color: #94A3B8;">Obligatoires et stockées en base distante</td>
+          <td style="padding: 14px 18px; color: #34D399; font-weight: 700; background: rgba(16, 185, 129, 0.04);">✔ ZÉRO-CLÉ requise (Mode Fichier Terraform)</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding: 14px 18px; font-weight: 700; color: var(--text-primary);">Isolation Mémoire &amp; Exfiltration</td>
+          <td style="padding: 14px 18px; color: #F87171;">Télémétrie centralisée chez le fournisseur</td>
+          <td style="padding: 14px 18px; color: #34D399; font-weight: 700; background: rgba(16, 185, 129, 0.04);">✔ Enclave Navigateur &amp; RAM Shredder</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding: 14px 18px; font-weight: 700; color: var(--text-primary);">Garantie Anti-Casse de Prod</td>
+          <td style="padding: 14px 18px; color: #94A3B8;">Risque de couper des alertes P0 critiques</td>
+          <td style="padding: 14px 18px; color: #34D399; font-weight: 700; background: rgba(16, 185, 129, 0.04);">✔ 98.5% Safe-to-Apply (Cross-check SLOs)</td>
+        </tr>
+        <tr>
+          <td style="padding: 14px 18px; font-weight: 700; color: var(--text-primary);">Preuve d'Audit Légal &amp; Conformité</td>
+          <td style="padding: 14px 18px; color: #94A3B8;">Logs serveurs modifiables classiques</td>
+          <td style="padding: 14px 18px; color: #34D399; font-weight: 700; background: rgba(16, 185, 129, 0.04);">✔ Registre Cryptographique WORM (SHA-256)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <section id="pricing">
