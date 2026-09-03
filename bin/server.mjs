@@ -52,6 +52,12 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, readFileSync(resolve(ROOT, 'public/index.html')), MIME['.html']);
     }
 
+    const staticPath = resolve(ROOT, 'public', url.pathname.slice(1));
+    if (req.method === 'GET' && existsSync(staticPath) && !url.pathname.includes('..')) {
+      const ext = extname(staticPath).toLowerCase();
+      return send(res, 200, readFileSync(staticPath), MIME[ext] || 'text/html; charset=utf-8');
+    }
+
     if (req.method === 'POST' && url.pathname === '/api/audit') {
       const body = await readJsonBody(req);
       const result = await runAuditFromBody(body);

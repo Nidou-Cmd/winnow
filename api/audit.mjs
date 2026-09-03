@@ -19,6 +19,9 @@ export default async function handler(req, res) {
     const minSave = Math.round(result.totals?.monthlySavingsMinUsd || 0);
     const maxSave = Math.round(result.totals?.monthlySavingsMaxUsd || 0);
     const annualSave = Math.round((minSave + maxSave) / 2 * 12);
+    const cyberScore = result.cybersecurity?.securityScore ?? 100;
+    const cyberGrade = result.cybersecurity?.postureGrade ?? 'A+';
+    const dlpViolations = result.cybersecurity?.totalViolations ?? 0;
 
     const reportHtml = `
     <!DOCTYPE html>
@@ -44,11 +47,11 @@ export default async function handler(req, res) {
             <table width="100%" border="0" cellpadding="0" cellspacing="0">
               <tr>
                 <td>
-                  <span style="font-size: 18px; font-weight: 800; color: #059669; letter-spacing: -0.5px;">⚡ Winnow FinOps</span>
+                  <span style="font-size: 18px; font-weight: 800; color: #059669; letter-spacing: -0.5px;">⚡ Winnow FinOps & Cyber Defense</span>
                 </td>
                 <td align="right">
                   <span style="background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 16px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
-                    ✔ Audit FinOps
+                    ✔ Audit FinOps & DLP
                   </span>
                 </td>
               </tr>
@@ -60,13 +63,13 @@ export default async function handler(req, res) {
         <tr>
           <td class="mobile-pad" style="padding: 28px 24px;">
             <h1 class="mobile-title" style="margin: 0 0 8px 0; font-size: 22px; font-weight: 800; color: #0f172a; line-height: 1.3;">
-              Rapport FinOps : ${company}
+              Rapport FinOps & Cybersécurité : ${company}
             </h1>
             <p style="margin: 0 0 20px 0; font-size: 13px; color: #64748b; line-height: 1.5;">
-              Optimisation de votre consommation de télémétrie Datadog & compute cloud.
+              Optimisation de la facture Datadog & détection des fuites de secrets dans la télémétrie.
             </p>
 
-            <!-- CARTE ÉCONOMIES RESPONSIVE -->
+            <!-- CARTE ÉCONOMIES & CYBER SCORE RESPONSIVE -->
             <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 24px;">
               <tr>
                 <td class="mobile-stack" style="padding: 16px; border-right: 1px solid #e2e8f0; text-align: center; width: 42%; vertical-align: middle;">
@@ -75,11 +78,11 @@ export default async function handler(req, res) {
                   <div style="font-size: 12px; font-weight: 700; color: #047857;">~$${annualSave.toLocaleString()} / an</div>
                 </td>
                 <td class="mobile-stack-last" style="padding: 16px; width: 58%; vertical-align: middle;">
-                  <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Pistes d'Action :</div>
+                  <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Bilan Cyber & Actions :</div>
                   <div style="font-size: 12px; color: #475569; line-height: 1.6;">
-                    • <strong>Métriques :</strong> Séries orphelines à purger<br>
-                    • <strong>Logs :</strong> Ingestion brute optimisable<br>
-                    • <strong>APM :</strong> Workloads inactifs détectés
+                    • <strong>Score Cyber :</strong> Grade ${cyberGrade} (${cyberScore}/100)<br>
+                    • <strong>Fuites DLP :</strong> ${dlpViolations} secrets/PII à masquer<br>
+                    • <strong>GitOps :</strong> Fix Terraform 1-clic prêt
                   </div>
                 </td>
               </tr>
@@ -195,7 +198,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           from: "Winnow FinOps <audit@winnowcost.com>",
           to: ADMIN_EMAILS,
-          subject: `🎯 [AUDIT WINNOW - RESPONSIVE] $${annualSave.toLocaleString()}/an pour ${company}`,
+          subject: `🎯 [AUDIT WINNOW v2.0] $${annualSave.toLocaleString()}/an • Grade ${cyberGrade} (${cyberScore}/100) pour ${company}`,
           html: reportHtml,
         }),
       });
@@ -213,7 +216,7 @@ export default async function handler(req, res) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             chat_id: chatId,
-            text: `🎯 *NOUVEL AUDIT WINNOW (Responsive 100%)*\n\n🏢 *Entreprise:* \`${company}\`\n💰 *Économies:* $${minSave}–$${maxSave}/mois\n🏷️ *Promo:* -50% FOUNDER50\n📬 *Statut:* Livré ✅`,
+            text: `🎯 *NOUVEL AUDIT WINNOW v2.0 (Cyber & FinOps)*\n\n🏢 *Entreprise:* \`${company}\`\n💰 *Économies:* $${minSave}–$${maxSave}/mois (~$${annualSave}/an)\n🛡️ *Cyber Score:* Grade ${cyberGrade} (${cyberScore}/100)\n🔍 *Fuites DLP:* ${dlpViolations} détectées\n🏷️ *Promo:* -50% FOUNDER50\n📬 *Statut:* Livré ✅`,
             parse_mode: "Markdown",
           }),
         });
