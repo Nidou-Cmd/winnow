@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Winnow - API Settings (Infisical)</title>
+  <style>
+    :root {
+      --bg: #070B11;
+      --surface: rgba(15, 23, 42, 0.7);
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #8B5CF6;
+    }
+    body {
+      margin: 0; padding: 0; font-family: 'Inter', sans-serif;
+      background: var(--bg); color: #F8FAFC;
+      display: flex; height: 100vh;
+    }
+    aside {
+      width: 250px; background: rgba(0,0,0,0.5); border-right: 1px solid var(--border);
+      padding: 24px; box-sizing: border-box;
+    }
+    .logo {
+      font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 40px;
+    }
+    .logo span { color: var(--accent); }
+    nav a {
+      display: block; padding: 12px; color: #94A3B8; text-decoration: none; border-radius: 8px; margin-bottom: 8px;
+    }
+    nav a:hover, nav a.active {
+      background: rgba(255,255,255,0.05); color: #fff;
+    }
+    main {
+      flex: 1; padding: 40px; overflow-y: auto;
+    }
+    .glass-panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      backdrop-filter: blur(20px); padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    th { color: #94A3B8; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="logo"><span>W</span> winnow</div>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="#">Cost Explorer</a>
+      <a href="#">Anomalies</a>
+      <a href="settings.html" class="active">Settings (API)</a>
+    </nav>
+  </aside>
+  <main>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+      <h1 style="margin: 0; font-size: 24px;">API Key Management & Security</h1>
+      <span style="color: #10B981; font-size: 12px; font-weight: 700;">● Infisical Connection: Healthy</span>
+    </div>
+
+    <div class="glass-panel">
+      <h2 style="margin: 0 0 16px; font-size: 16px;">Infisical Secret Vaults</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Vault Name</th>
+            <th>Environment</th>
+            <th>Key Count</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Global-Production (Default)</td>
+            <td>Production</td>
+            <td>8 Keys</td>
+            <td style="color: #38BDF8;">Synced with Infisical</td>
+          </tr>
+          <tr>
+            <td>E-commerce-Staging</td>
+            <td>Staging</td>
+            <td>3 Keys</td>
+            <td style="color: #38BDF8;">Synced with Infisical</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin: 32px 0 16px; font-size: 16px;">Current API Keys</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>API Key</th>
+            <th>Environment</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Stripe-Integration</td>
+            <td style="font-family: monospace;">pk_live_**************</td>
+            <td>Default</td>
+            <td style="color: #10B981;">Active</td>
+            <td>
+              <a href="#" style="color: #38BDF8; margin-right: 8px;">Edit</a>
+              <a href="#" style="color: #10B981; margin-right: 8px;">Rotate</a>
+              <a href="#" style="color: #EF4444;">Revoke</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

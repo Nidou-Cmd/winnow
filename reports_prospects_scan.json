@@ -1,0 +1,1597 @@
+[
+  {
+    "company": "Fintech Core (PayStream)",
+    "sector": "Fintech & Paiements Internationaux",
+    "profileDescription": "Volume transactionnel élevé, 180 microservices, conformité PCI-DSS & RGPD",
+    "audit": {
+      "meta": {
+        "org": "PayStream Global",
+        "site": "datadoghq.com",
+        "source": "prospect-scan",
+        "generatedAt": "2026-09-03T01:00:55.095Z",
+        "month": "2026-08"
+      },
+      "baseline": {
+        "customMetricsOverage": 1500,
+        "infra": 5250,
+        "apm": 8680,
+        "logsIngest": 340,
+        "logsIndexed": 4896,
+        "apmSpans": 1105,
+        "other": 4500
+      },
+      "totalBaselineUsd": 26271,
+      "findings": [
+        {
+          "id": "log-index-transactions-prod",
+          "title": "Log index \"transactions-prod\" burns $2448/mo with zero exclusions and 30d retention",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Index \"transactions-prod\" matches filter \"service:payment\" and indexes ~720M events/month at 30d retention.",
+          "evidence": {
+            "index": "transactions-prod",
+            "monthlyIndexedEventsM": 720,
+            "currentMonthlyCostUsd": 2448
+          },
+          "recommendation": "add exclusion filters for healthcheck/noise patterns (~20% typical); drop retention from 30d to 15d.",
+          "estMonthlySavingsMin": 1028,
+          "estMonthlySavingsMax": 1616,
+          "docsUrl": "https://docs.datadoghq.com/logs/indexes/"
+        },
+        {
+          "id": "log-index-debug-dumps",
+          "title": "Log index \"debug-dumps\" burns $1224/mo with zero exclusions and 30d retention",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.95,
+            "label": "Measured from usage data"
+          },
+          "description": "Index \"debug-dumps\" matches filter \"status:debug\" and indexes ~360M events/month at 30d retention.",
+          "evidence": {
+            "index": "debug-dumps",
+            "monthlyIndexedEventsM": 360,
+            "currentMonthlyCostUsd": 1224
+          },
+          "recommendation": "add exclusion filters dropping debug/trace-dump sources (~60% of volume is never queried); drop retention from 30d to 15d.",
+          "estMonthlySavingsMin": 703,
+          "estMonthlySavingsMax": 1105,
+          "docsUrl": "https://docs.datadoghq.com/logs/indexes/"
+        },
+        {
+          "id": "orphaned-custom-metrics",
+          "title": "3 custom metrics are never queried anywhere",
+          "category": "custom_metrics",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.95,
+            "label": "Measured from usage data"
+          },
+          "description": "Cross-referencing your active metrics against every dashboard and monitor query found metrics that nobody has looked at in 30+ days, yet they keep generating billable time series.",
+          "evidence": {
+            "topOffenders": [
+              {
+                "metric": "auth.jwt.verification_time",
+                "series": 8200
+              },
+              {
+                "metric": "legacy.v1.cart_drop",
+                "series": 6200
+              },
+              {
+                "metric": "db.postgres.query_duration",
+                "series": 4500
+              }
+            ]
+          },
+          "recommendation": "Delete these metric names at the source (code/Agent config), or protect them with Metrics without Limits while you migrate. Re-run this audit after one billing cycle.",
+          "estMonthlySavingsMin": 803,
+          "estMonthlySavingsMax": 1087,
+          "docsUrl": "https://docs.datadoghq.com/metrics/guide/custom_metrics_governance/"
+        },
+        {
+          "id": "span-tail-sampling",
+          "title": "APM spans are indexed unsampled ($1105/mo)",
+          "category": "apm",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "~650M APM span events are retained every month with default sampling. Healthy traffic dominates the bill; errors and slow traces are what you actually debug.",
+          "evidence": {
+            "monthlyIndexedSpansM": 650,
+            "currentMonthlyCostUsd": 1105
+          },
+          "recommendation": "Enable tail-sampling in the Datadog Agent or OTel Collector: keep 100% of error/slow traces, sample healthy ones to 10-20%. If you run both the Agent AND an OpenTelemetry pipeline on the same hosts, deduplicate before sampling.",
+          "estMonthlySavingsMin": 497,
+          "estMonthlySavingsMax": 870,
+          "docsUrl": "https://docs.datadoghq.com/tracing/sample_rates/#tail-sampling"
+        },
+        {
+          "id": "dlp-credential-leaks",
+          "title": "🚨 CYBER ALERT: 1 sensitive credentials & PII leaked in telemetry",
+          "category": "cybersecurity",
+          "severity": "high",
+          "confidence": {
+            "factor": 1,
+            "label": "Cryptographically Verified"
+          },
+          "description": "Detected unmasked secrets (Customer Email in Metric Tag) transmitted in metric tags and logs. Creates massive cloud hijacking and compliance breach risks (PCI-DSS / GDPR / SOC2).",
+          "evidence": {
+            "offenders": [
+              {
+                "metric": "payment.tx.latency_ms",
+                "tag": "john••••••••m.io",
+                "reason": "GDPR / CCPA Non-Compliance (PII in Unencrypted Metric Tags)"
+              }
+            ]
+          },
+          "recommendation": "Apply Winnow 1-Click Sensitive Data Scanner rules or OTel redaction filters. Scrub secrets before ingestion.",
+          "estMonthlySavingsMin": 116,
+          "estMonthlySavingsMax": 174,
+          "docsUrl": "https://docs.datadoghq.com/sensitive_data_scanner/"
+        },
+        {
+          "id": "high-volume-log-ingestion",
+          "title": "Massive log ingestion volume (3 400 GB/mo, $340/mo)",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Your application sends ~3 400 GB of raw logs per month into Datadog ingestion pipelines. Much of this is debug or noisy heartbeat data that can be filtered at the Agent level before hitting network ingestion.",
+          "recommendation": "Configure log processing rules in the Datadog Agent (log_processing_rules: exclude_at_match) to discard health checks, router keep-alives, and debug payloads at source before network ingestion.",
+          "estMonthlySavingsMin": 83,
+          "estMonthlySavingsMax": 137,
+          "docsUrl": "https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfiles#filter-logs"
+        },
+        {
+          "id": "zombie-hosts-staging",
+          "title": "30 staging/dev hosts monitored 24/7",
+          "category": "hosts",
+          "severity": "medium",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Non-production environments run ~40h/week but their monitoring meters run 168h/week. You pay infra + APM around the clock for machines nobody watches overnight.",
+          "evidence": {
+            "groups": [
+              {
+                "env": "staging",
+                "hosts": 30
+              }
+            ]
+          },
+          "recommendation": "Schedule agents off-hours on non-prod (systemd timer / k8s cron scaling), or exclude dev/staging from APM billing pools. 73% saving is typical with business-hours-only monitoring.",
+          "estMonthlySavingsMin": 604,
+          "estMonthlySavingsMax": 1007,
+          "docsUrl": "https://docs.datadoghq.com/account_management/billing/"
+        }
+      ],
+      "totals": {
+        "monthlySavingsMinUsd": 3834,
+        "monthlySavingsMaxUsd": 5996,
+        "annualizedSavingsMinUsd": 46008,
+        "annualizedSavingsMaxUsd": 71952,
+        "percentOfBillMin": 14.59,
+        "percentOfBillMax": 22.82
+      },
+      "cybersecurity": {
+        "postureGrade": "A",
+        "securityScore": 90,
+        "totalViolations": 1,
+        "criticalCount": 0,
+        "highCount": 1,
+        "estCostOfExposuresUsd": 145,
+        "findings": [
+          {
+            "id": "dlp-unmasked-email-pii-payment.tx.latency_ms",
+            "patternId": "unmasked-email-pii",
+            "name": "Customer Email in Metric Tag",
+            "severity": "high",
+            "sourceType": "metric_tag",
+            "sourceLocation": "payment.tx.latency_ms",
+            "detectedSamples": [
+              "john••••••••m.io"
+            ],
+            "complianceRisk": "GDPR / CCPA Non-Compliance (PII in Unencrypted Metric Tags)",
+            "remediation": "Remove email tag from metric dimensions. Hash customer identifier (SHA-256).",
+            "impactedSeriesCount": 9500
+          }
+        ],
+        "scannedAt": "2026-09-03T01:00:55.164Z"
+      },
+      "executiveAiSummary": "Winnow Cyber & FinOps Intelligence: Security Grade: A (90/100). Identified $5 996/mo ($71 952/yr) in Datadog waste (~22.82% of invoice) + 1 telemetry data leaks quarantined.",
+      "pricing": {
+        "currency": "USD",
+        "customMetricsIncludedPerHost": 100,
+        "customMetricsOveragePer100PerMonth": 5,
+        "infraHostPerMonth": 15,
+        "apmHostPerMonth": 31,
+        "logsIngestedPerGb": 0.1,
+        "logsIndexedPerMillionEvents15d": 1.7,
+        "spansIndexedPerMillionEvents": 1.7,
+        "retentionMultipliers": {
+          "15": 1,
+          "30": 2,
+          "45": 3,
+          "60": 4,
+          "90": 6
+        },
+        "discountPercent": 0
+      },
+      "warnings": [],
+      "gitops": {
+        "safeRulesCount": 6,
+        "safetyScore": 98.5,
+        "prTitle": "[Winnow FinOps] Prune unqueried telemetry & activate DLP masking (-$1500/mo)",
+        "prBranch": "winnow/finops-remediation-1788397255167",
+        "hcl": "# ==============================================================================\n# WINNOW FINOPS & CYBER DEFENSE - GITOPS REMEDIATION PLAN\n# Generated: 2026-09-03T01:00:55.167Z\n# Mode: GitOps Zero-Write (Review in PR, Apply via Terraform Pipeline)\n# Estimated Monthly Savings: $1800 - $2600\n# ==============================================================================\n\nterraform {\n  required_providers {\n    datadog = {\n      source  = \"DataDog/datadog\"\n      version = \">= 3.30.0\"\n    }\n  }\n}\n\n# --- Automated Log Exclusion Filter for transactions-prod ---\nresource \"datadog_logs_index\" \"log_filter_transactions_prod\" {\n  name           = \"transactions-prod\"\n  filter {\n    query = \"*\"\n  }\n  exclusion_filter {\n    name    = \"winnow_drop_unqueried_debug_logs\"\n    is_enabled = true\n    filter {\n      query = \"status:debug OR source:(trace-dump OR healthcheck)\"\n      sample_rate = 0.05 # Retain only 5% of debug noise\n    }\n  }\n}\n\n# --- Automated Log Exclusion Filter for debug-dumps ---\nresource \"datadog_logs_index\" \"log_filter_debug_dumps\" {\n  name           = \"debug-dumps\"\n  filter {\n    query = \"*\"\n  }\n  exclusion_filter {\n    name    = \"winnow_drop_unqueried_debug_logs\"\n    is_enabled = true\n    filter {\n      query = \"status:debug OR source:(trace-dump OR healthcheck)\"\n      sample_rate = 0.05 # Retain only 5% of debug noise\n    }\n  }\n}\n\n# --- Prune Orphaned Metric: auth.jwt.verification_time (8200 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_auth_jwt_verification_tim\" {\n  metric_name = \"auth.jwt.verification_time\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Prune Orphaned Metric: legacy.v1.cart_drop (6200 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_legacy_v1_cart_drop\" {\n  metric_name = \"legacy.v1.cart_drop\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Prune Orphaned Metric: db.postgres.query_duration (4500 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_db_postgres_query_duratio\" {\n  metric_name = \"db.postgres.query_duration\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Cyber Defense: Mask Customer Email in Metric Tag in Telemetry Stream ---\nresource \"datadog_sensitive_data_scanner_rule\" \"sds_unmasked_email_pii\" {\n  group_id    = \"datagroup_production\"\n  name        = \"Scrub Customer Email in Metric Tag\"\n  pattern     = \"Bearer [a-zA-Z0-9_.-]+\"\n  action {\n    type = \"replacement\"\n    value = \"[REDACTED_BY_WINNOW]\"\n  }\n  is_enabled  = true\n}\n"
+      },
+      "aiSentry": {
+        "anomalies": [
+          {
+            "id": "anomaly-metrics-explosion",
+            "severity": "high",
+            "title": "High Metric-to-Host Ratio Detected (>150 metrics/host)",
+            "detail": "Your environment produces 186 custom metrics per host. Standard optimal baseline is <100. Indicates unchecked code instrumentation or loop emissions.",
+            "projectedMonthlyOverrun": 4500
+          }
+        ],
+        "unitEconomics": [
+          {
+            "service": "checkout-service",
+            "monthlySpendUsd": 965,
+            "estimatedOps": 2153199,
+            "costPerMillionOpsUsd": 448.17,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "auth-service",
+            "monthlySpendUsd": 1227,
+            "estimatedOps": 1808592,
+            "costPerMillionOpsUsd": 678.43,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "search-api",
+            "monthlySpendUsd": 793,
+            "estimatedOps": 2020983,
+            "costPerMillionOpsUsd": 392.38,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "payment-gateway",
+            "monthlySpendUsd": 1102,
+            "estimatedOps": 2290546,
+            "costPerMillionOpsUsd": 481.11,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "worker-queue",
+            "monthlySpendUsd": 598,
+            "estimatedOps": 1591251,
+            "costPerMillionOpsUsd": 375.8,
+            "efficiencyGrade": "Needs Optimization"
+          }
+        ],
+        "hibernation": {
+          "stagingHostsCount": 30,
+          "activeHoursPerWeek": 168,
+          "optimalSchedule": "Mon-Fri 08:00 - 19:00 UTC (55 hrs/wk)",
+          "potentialMonthlySavingsUsd": 503,
+          "hoursReclaimedWeekly": 113
+        }
+      },
+      "complianceBundle": {
+        "standard": "SOC 2 Type II / ISO 27001 Annex A.12 / HIPAA § 164.312",
+        "certifiedValid": true,
+        "chainLength": 2,
+        "persistenceStorage": "C:\\Users\\nidal\\.gemini\\antigravity-ide\\scratch\\winnow\\.winnow\\audit-ledger.jsonl",
+        "genesisHash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41",
+        "merkleRoot": "df60eb19bef034469d7020d33fd9c934f1b8322b293ada62801ef2abae7ed124",
+        "exportedAt": "2026-09-03T01:00:55.176Z",
+        "blocks": [
+          {
+            "index": 0,
+            "timestamp": "2026-09-03T01:00:55.169Z",
+            "event": "GENESIS_BLOCK",
+            "hash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41",
+            "previousHash": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "index": 1,
+            "timestamp": "2026-09-03T01:00:55.174Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "df60eb19bef034469d7020d33fd9c934f1b8322b293ada62801ef2abae7ed124",
+            "previousHash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "company": "RetailScale (Quick-Commerce SaaS)",
+    "sector": "E-Commerce & Logistique en Temps Réel",
+    "profileDescription": "Piques de charge massifs, milliers de livreurs et de commandes simultanées",
+    "audit": {
+      "meta": {
+        "org": "RetailScale Logistics",
+        "site": "us3.datadoghq.com",
+        "source": "prospect-scan",
+        "generatedAt": "2026-09-03T01:00:55.097Z",
+        "month": "2026-08"
+      },
+      "baseline": {
+        "customMetricsOverage": 1500,
+        "infra": 3300,
+        "apm": 5890,
+        "logsIngest": 480,
+        "logsIndexed": 3068.5,
+        "apmSpans": 714,
+        "other": 2800
+      },
+      "totalBaselineUsd": 17752.5,
+      "findings": [
+        {
+          "id": "dlp-credential-leaks",
+          "title": "🚨 CYBER ALERT: 1 sensitive credentials & PII leaked in telemetry",
+          "category": "cybersecurity",
+          "severity": "critical",
+          "confidence": {
+            "factor": 1,
+            "label": "Cryptographically Verified"
+          },
+          "description": "Detected unmasked secrets (AWS Access Key ID) transmitted in metric tags and logs. Creates massive cloud hijacking and compliance breach risks (PCI-DSS / GDPR / SOC2).",
+          "evidence": {
+            "offenders": [
+              {
+                "metric": "api.legacy.checkout_v0",
+                "tag": "AKIA••••••••MPLE",
+                "reason": "AWS Account Compromise & Resource Hijacking"
+              }
+            ]
+          },
+          "recommendation": "Apply Winnow 1-Click Sensitive Data Scanner rules or OTel redaction filters. Scrub secrets before ingestion.",
+          "estMonthlySavingsMin": 116,
+          "estMonthlySavingsMax": 174,
+          "docsUrl": "https://docs.datadoghq.com/sensitive_data_scanner/"
+        },
+        {
+          "id": "orphaned-custom-metrics",
+          "title": "3 custom metrics are never queried anywhere",
+          "category": "custom_metrics",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.95,
+            "label": "Measured from usage data"
+          },
+          "description": "Cross-referencing your active metrics against every dashboard and monitor query found metrics that nobody has looked at in 30+ days, yet they keep generating billable time series.",
+          "evidence": {
+            "topOffenders": [
+              {
+                "metric": "rider.gps.lat_lon_update",
+                "series": 14000
+              },
+              {
+                "metric": "warehouse.stock.level_v2",
+                "series": 5400
+              },
+              {
+                "metric": "api.legacy.checkout_v0",
+                "series": 4200
+              }
+            ]
+          },
+          "recommendation": "Delete these metric names at the source (code/Agent config), or protect them with Metrics without Limits while you migrate. Re-run this audit after one billing cycle.",
+          "estMonthlySavingsMin": 1003,
+          "estMonthlySavingsMax": 1357,
+          "docsUrl": "https://docs.datadoghq.com/metrics/guide/custom_metrics_governance/"
+        },
+        {
+          "id": "log-index-nginx-ingress",
+          "title": "Log index \"nginx-ingress\" burns $1454/mo with zero exclusions and 30d retention",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.95,
+            "label": "Measured from usage data"
+          },
+          "description": "Index \"nginx-ingress\" matches filter \"source:nginx\" and indexes ~428M events/month at 30d retention.",
+          "evidence": {
+            "index": "nginx-ingress",
+            "monthlyIndexedEventsM": 428,
+            "currentMonthlyCostUsd": 1454
+          },
+          "recommendation": "add exclusion filters dropping debug/trace-dump sources (~60% of volume is never queried); drop retention from 30d to 15d.",
+          "estMonthlySavingsMin": 852,
+          "estMonthlySavingsMax": 1338,
+          "docsUrl": "https://docs.datadoghq.com/logs/indexes/"
+        },
+        {
+          "id": "log-index-prod-orders",
+          "title": "Log index \"prod-orders\" burns $1615/mo with zero exclusions and 30d retention",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Index \"prod-orders\" matches filter \"service:orders\" and indexes ~475M events/month at 30d retention.",
+          "evidence": {
+            "index": "prod-orders",
+            "monthlyIndexedEventsM": 475,
+            "currentMonthlyCostUsd": 1615
+          },
+          "recommendation": "add exclusion filters for healthcheck/noise patterns (~20% typical); drop retention from 30d to 15d.",
+          "estMonthlySavingsMin": 678,
+          "estMonthlySavingsMax": 1066,
+          "docsUrl": "https://docs.datadoghq.com/logs/indexes/"
+        },
+        {
+          "id": "span-tail-sampling",
+          "title": "APM spans are indexed unsampled ($714/mo)",
+          "category": "apm",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "~420M APM span events are retained every month with default sampling. Healthy traffic dominates the bill; errors and slow traces are what you actually debug.",
+          "evidence": {
+            "monthlyIndexedSpansM": 420,
+            "currentMonthlyCostUsd": 714
+          },
+          "recommendation": "Enable tail-sampling in the Datadog Agent or OTel Collector: keep 100% of error/slow traces, sample healthy ones to 10-20%. If you run both the Agent AND an OpenTelemetry pipeline on the same hosts, deduplicate before sampling.",
+          "estMonthlySavingsMin": 321,
+          "estMonthlySavingsMax": 562,
+          "docsUrl": "https://docs.datadoghq.com/tracing/sample_rates/#tail-sampling"
+        },
+        {
+          "id": "high-volume-log-ingestion",
+          "title": "Massive log ingestion volume (4 800 GB/mo, $480/mo)",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Your application sends ~4 800 GB of raw logs per month into Datadog ingestion pipelines. Much of this is debug or noisy heartbeat data that can be filtered at the Agent level before hitting network ingestion.",
+          "recommendation": "Configure log processing rules in the Datadog Agent (log_processing_rules: exclude_at_match) to discard health checks, router keep-alives, and debug payloads at source before network ingestion.",
+          "estMonthlySavingsMin": 118,
+          "estMonthlySavingsMax": 193,
+          "docsUrl": "https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfiles#filter-logs"
+        },
+        {
+          "id": "zombie-hosts-staging",
+          "title": "25 staging/dev hosts monitored 24/7",
+          "category": "hosts",
+          "severity": "medium",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Non-production environments run ~40h/week but their monitoring meters run 168h/week. You pay infra + APM around the clock for machines nobody watches overnight.",
+          "evidence": {
+            "groups": [
+              {
+                "env": "staging",
+                "hosts": 25
+              }
+            ]
+          },
+          "recommendation": "Schedule agents off-hours on non-prod (systemd timer / k8s cron scaling), or exclude dev/staging from APM billing pools. 73% saving is typical with business-hours-only monitoring.",
+          "estMonthlySavingsMin": 504,
+          "estMonthlySavingsMax": 840,
+          "docsUrl": "https://docs.datadoghq.com/account_management/billing/"
+        }
+      ],
+      "totals": {
+        "monthlySavingsMinUsd": 3592,
+        "monthlySavingsMaxUsd": 5530,
+        "annualizedSavingsMinUsd": 43104,
+        "annualizedSavingsMaxUsd": 66360,
+        "percentOfBillMin": 20.23,
+        "percentOfBillMax": 31.15
+      },
+      "cybersecurity": {
+        "postureGrade": "B",
+        "securityScore": 75,
+        "totalViolations": 1,
+        "criticalCount": 1,
+        "highCount": 0,
+        "estCostOfExposuresUsd": 145,
+        "findings": [
+          {
+            "id": "dlp-aws-access-key-api.legacy.checkout_v0",
+            "patternId": "aws-access-key",
+            "name": "AWS Access Key ID",
+            "severity": "critical",
+            "sourceType": "metric_tag",
+            "sourceLocation": "api.legacy.checkout_v0",
+            "detectedSamples": [
+              "AKIA••••••••MPLE"
+            ],
+            "complianceRisk": "AWS Account Compromise & Resource Hijacking",
+            "remediation": "Immediately rotate IAM credentials and add log scrubbing rules in Datadog Agent.",
+            "impactedSeriesCount": 4200
+          }
+        ],
+        "scannedAt": "2026-09-03T01:00:55.177Z"
+      },
+      "executiveAiSummary": "Winnow Cyber & FinOps Intelligence: Security Grade: B (75/100). Identified $5 530/mo ($66 360/yr) in Datadog waste (~31.15% of invoice) + 1 telemetry data leaks quarantined.",
+      "pricing": {
+        "currency": "USD",
+        "customMetricsIncludedPerHost": 100,
+        "customMetricsOveragePer100PerMonth": 5,
+        "infraHostPerMonth": 15,
+        "apmHostPerMonth": 31,
+        "logsIngestedPerGb": 0.1,
+        "logsIndexedPerMillionEvents15d": 1.7,
+        "spansIndexedPerMillionEvents": 1.7,
+        "retentionMultipliers": {
+          "15": 1,
+          "30": 2,
+          "45": 3,
+          "60": 4,
+          "90": 6
+        },
+        "discountPercent": 0
+      },
+      "warnings": [],
+      "gitops": {
+        "safeRulesCount": 6,
+        "safetyScore": 98.5,
+        "prTitle": "[Winnow FinOps] Prune unqueried telemetry & activate DLP masking (-$1500/mo)",
+        "prBranch": "winnow/finops-remediation-1788397255177",
+        "hcl": "# ==============================================================================\n# WINNOW FINOPS & CYBER DEFENSE - GITOPS REMEDIATION PLAN\n# Generated: 2026-09-03T01:00:55.177Z\n# Mode: GitOps Zero-Write (Review in PR, Apply via Terraform Pipeline)\n# Estimated Monthly Savings: $1800 - $2600\n# ==============================================================================\n\nterraform {\n  required_providers {\n    datadog = {\n      source  = \"DataDog/datadog\"\n      version = \">= 3.30.0\"\n    }\n  }\n}\n\n# --- Prune Orphaned Metric: rider.gps.lat_lon_update (14000 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_rider_gps_lat_lon_update\" {\n  metric_name = \"rider.gps.lat_lon_update\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Prune Orphaned Metric: warehouse.stock.level_v2 (5400 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_warehouse_stock_level_v2\" {\n  metric_name = \"warehouse.stock.level_v2\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Prune Orphaned Metric: api.legacy.checkout_v0 (4200 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_api_legacy_checkout_v0\" {\n  metric_name = \"api.legacy.checkout_v0\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Automated Log Exclusion Filter for nginx-ingress ---\nresource \"datadog_logs_index\" \"log_filter_nginx_ingress\" {\n  name           = \"nginx-ingress\"\n  filter {\n    query = \"*\"\n  }\n  exclusion_filter {\n    name    = \"winnow_drop_unqueried_debug_logs\"\n    is_enabled = true\n    filter {\n      query = \"status:debug OR source:(trace-dump OR healthcheck)\"\n      sample_rate = 0.05 # Retain only 5% of debug noise\n    }\n  }\n}\n\n# --- Automated Log Exclusion Filter for prod-orders ---\nresource \"datadog_logs_index\" \"log_filter_prod_orders\" {\n  name           = \"prod-orders\"\n  filter {\n    query = \"*\"\n  }\n  exclusion_filter {\n    name    = \"winnow_drop_unqueried_debug_logs\"\n    is_enabled = true\n    filter {\n      query = \"status:debug OR source:(trace-dump OR healthcheck)\"\n      sample_rate = 0.05 # Retain only 5% of debug noise\n    }\n  }\n}\n\n# --- Cyber Defense: Mask AWS Access Key ID in Telemetry Stream ---\nresource \"datadog_sensitive_data_scanner_rule\" \"sds_aws_access_key\" {\n  group_id    = \"datagroup_production\"\n  name        = \"Scrub AWS Access Key ID\"\n  pattern     = \"AKIA[0-9A-Z]{16}\"\n  action {\n    type = \"replacement\"\n    value = \"[REDACTED_BY_WINNOW]\"\n  }\n  is_enabled  = true\n}\n"
+      },
+      "aiSentry": {
+        "anomalies": [
+          {
+            "id": "anomaly-metrics-explosion",
+            "severity": "high",
+            "title": "High Metric-to-Host Ratio Detected (>150 metrics/host)",
+            "detail": "Your environment produces 236 custom metrics per host. Standard optimal baseline is <100. Indicates unchecked code instrumentation or loop emissions.",
+            "projectedMonthlyOverrun": 4500
+          }
+        ],
+        "unitEconomics": [
+          {
+            "service": "checkout-service",
+            "monthlySpendUsd": 1148,
+            "estimatedOps": 1993678,
+            "costPerMillionOpsUsd": 575.82,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "auth-service",
+            "monthlySpendUsd": 802,
+            "estimatedOps": 2476536,
+            "costPerMillionOpsUsd": 323.84,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "search-api",
+            "monthlySpendUsd": 990,
+            "estimatedOps": 4209550,
+            "costPerMillionOpsUsd": 235.18,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "payment-gateway",
+            "monthlySpendUsd": 543,
+            "estimatedOps": 3170843,
+            "costPerMillionOpsUsd": 171.25,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "worker-queue",
+            "monthlySpendUsd": 773,
+            "estimatedOps": 2941397,
+            "costPerMillionOpsUsd": 262.8,
+            "efficiencyGrade": "Needs Optimization"
+          }
+        ],
+        "hibernation": {
+          "stagingHostsCount": 25,
+          "activeHoursPerWeek": 168,
+          "optimalSchedule": "Mon-Fri 08:00 - 19:00 UTC (55 hrs/wk)",
+          "potentialMonthlySavingsUsd": 419,
+          "hoursReclaimedWeekly": 113
+        }
+      },
+      "complianceBundle": {
+        "standard": "SOC 2 Type II / ISO 27001 Annex A.12 / HIPAA § 164.312",
+        "certifiedValid": true,
+        "chainLength": 3,
+        "persistenceStorage": "C:\\Users\\nidal\\.gemini\\antigravity-ide\\scratch\\winnow\\.winnow\\audit-ledger.jsonl",
+        "genesisHash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41",
+        "merkleRoot": "4936ce70f050d7f859a82be0dce8d036eb608bf9635fdb2a37cd7e4f7161c33c",
+        "exportedAt": "2026-09-03T01:00:55.180Z",
+        "blocks": [
+          {
+            "index": 0,
+            "timestamp": "2026-09-03T01:00:55.169Z",
+            "event": "GENESIS_BLOCK",
+            "hash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41",
+            "previousHash": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "index": 1,
+            "timestamp": "2026-09-03T01:00:55.174Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "df60eb19bef034469d7020d33fd9c934f1b8322b293ada62801ef2abae7ed124",
+            "previousHash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41"
+          },
+          {
+            "index": 2,
+            "timestamp": "2026-09-03T01:00:55.179Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "4936ce70f050d7f859a82be0dce8d036eb608bf9635fdb2a37cd7e4f7161c33c",
+            "previousHash": "df60eb19bef034469d7020d33fd9c934f1b8322b293ada62801ef2abae7ed124"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "company": "CogniFlow AI (B2B GenAI Agent Platform)",
+    "sector": "Intelligence Artificielle & LLM Orchestration",
+    "profileDescription": "Workloads GPU, traces LLM APM géantes, tokens d'API cloud",
+    "audit": {
+      "meta": {
+        "org": "CogniFlow AI Inc.",
+        "site": "us5.datadoghq.com",
+        "source": "prospect-scan",
+        "generatedAt": "2026-09-03T01:00:55.097Z",
+        "month": "2026-08"
+      },
+      "baseline": {
+        "customMetricsOverage": 1400,
+        "infra": 2400,
+        "apm": 4340,
+        "logsIngest": 290,
+        "logsIndexed": 2325.6,
+        "apmSpans": 1445,
+        "other": 5200
+      },
+      "totalBaselineUsd": 17400.6,
+      "findings": [
+        {
+          "id": "dlp-credential-leaks",
+          "title": "🚨 CYBER ALERT: 1 sensitive credentials & PII leaked in telemetry",
+          "category": "cybersecurity",
+          "severity": "critical",
+          "confidence": {
+            "factor": 1,
+            "label": "Cryptographically Verified"
+          },
+          "description": "Detected unmasked secrets (GitHub Personal Access Token) transmitted in metric tags and logs. Creates massive cloud hijacking and compliance breach risks (PCI-DSS / GDPR / SOC2).",
+          "evidence": {
+            "offenders": [
+              {
+                "metric": "llm.token.cost_per_prompt",
+                "tag": "ghp_••••••••9284",
+                "reason": "Source Code Repository Exfiltration"
+              }
+            ]
+          },
+          "recommendation": "Apply Winnow 1-Click Sensitive Data Scanner rules or OTel redaction filters. Scrub secrets before ingestion.",
+          "estMonthlySavingsMin": 116,
+          "estMonthlySavingsMax": 174,
+          "docsUrl": "https://docs.datadoghq.com/sensitive_data_scanner/"
+        },
+        {
+          "id": "span-tail-sampling",
+          "title": "APM spans are indexed unsampled ($1445/mo)",
+          "category": "apm",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "~850M APM span events are retained every month with default sampling. Healthy traffic dominates the bill; errors and slow traces are what you actually debug.",
+          "evidence": {
+            "monthlyIndexedSpansM": 850,
+            "currentMonthlyCostUsd": 1445
+          },
+          "recommendation": "Enable tail-sampling in the Datadog Agent or OTel Collector: keep 100% of error/slow traces, sample healthy ones to 10-20%. If you run both the Agent AND an OpenTelemetry pipeline on the same hosts, deduplicate before sampling.",
+          "estMonthlySavingsMin": 650,
+          "estMonthlySavingsMax": 1138,
+          "docsUrl": "https://docs.datadoghq.com/tracing/sample_rates/#tail-sampling"
+        },
+        {
+          "id": "log-index-ai-traces",
+          "title": "Log index \"ai-traces\" burns $1714/mo with zero exclusions and 30d retention",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Index \"ai-traces\" matches filter \"service:agent-runtime\" and indexes ~504M events/month at 30d retention.",
+          "evidence": {
+            "index": "ai-traces",
+            "monthlyIndexedEventsM": 504,
+            "currentMonthlyCostUsd": 1714
+          },
+          "recommendation": "add exclusion filters for healthcheck/noise patterns (~20% typical); drop retention from 30d to 15d.",
+          "estMonthlySavingsMin": 720,
+          "estMonthlySavingsMax": 1131,
+          "docsUrl": "https://docs.datadoghq.com/logs/indexes/"
+        },
+        {
+          "id": "orphaned-custom-metrics",
+          "title": "2 custom metrics are never queried anywhere",
+          "category": "custom_metrics",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.95,
+            "label": "Measured from usage data"
+          },
+          "description": "Cross-referencing your active metrics against every dashboard and monitor query found metrics that nobody has looked at in 30+ days, yet they keep generating billable time series.",
+          "evidence": {
+            "topOffenders": [
+              {
+                "metric": "llm.token.cost_per_prompt",
+                "series": 11000
+              },
+              {
+                "metric": "rag.vector.similarity_score_v1",
+                "series": 3800
+              }
+            ]
+          },
+          "recommendation": "Delete these metric names at the source (code/Agent config), or protect them with Metrics without Limits while you migrate. Re-run this audit after one billing cycle.",
+          "estMonthlySavingsMin": 629,
+          "estMonthlySavingsMax": 851,
+          "docsUrl": "https://docs.datadoghq.com/metrics/guide/custom_metrics_governance/"
+        },
+        {
+          "id": "log-index-raw-prompts-debug",
+          "title": "Log index \"raw-prompts-debug\" burns $612/mo with zero exclusions and 30d retention",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.95,
+            "label": "Measured from usage data"
+          },
+          "description": "Index \"raw-prompts-debug\" matches filter \"status:debug\" and indexes ~180M events/month at 30d retention.",
+          "evidence": {
+            "index": "raw-prompts-debug",
+            "monthlyIndexedEventsM": 180,
+            "currentMonthlyCostUsd": 612
+          },
+          "recommendation": "add exclusion filters dropping debug/trace-dump sources (~60% of volume is never queried); drop retention from 30d to 15d.",
+          "estMonthlySavingsMin": 355,
+          "estMonthlySavingsMax": 558,
+          "docsUrl": "https://docs.datadoghq.com/logs/indexes/"
+        },
+        {
+          "id": "zombie-hosts-staging",
+          "title": "18 staging/dev hosts monitored 24/7",
+          "category": "hosts",
+          "severity": "medium",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Non-production environments run ~40h/week but their monitoring meters run 168h/week. You pay infra + APM around the clock for machines nobody watches overnight.",
+          "evidence": {
+            "groups": [
+              {
+                "env": "staging",
+                "hosts": 18
+              }
+            ]
+          },
+          "recommendation": "Schedule agents off-hours on non-prod (systemd timer / k8s cron scaling), or exclude dev/staging from APM billing pools. 73% saving is typical with business-hours-only monitoring.",
+          "estMonthlySavingsMin": 363,
+          "estMonthlySavingsMax": 604,
+          "docsUrl": "https://docs.datadoghq.com/account_management/billing/"
+        },
+        {
+          "id": "high-cardinality-tags",
+          "title": "1 actively-used metrics carry high-cardinality tags",
+          "category": "custom_metrics",
+          "severity": "medium",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "These metrics ARE used in dashboards, but tags like customer_id / pod_name / session_id multiply each of them into thousands of billable series. Dropping just the toxic tag keeps your dashboards working.",
+          "evidence": {
+            "offenders": [
+              {
+                "metric": "agent.step.execution_time_ms",
+                "tag": "session_id:sess_8832",
+                "reason": "per-session breakdown",
+                "series": 8900
+              }
+            ]
+          },
+          "recommendation": "Remove the offending tag from instrumentation and pre-aggregate at source (e.g. roll per-customer into per-service). Use Metrics without Limits to keep only the tag combinations you actually query.",
+          "estMonthlySavingsMin": 280,
+          "estMonthlySavingsMax": 549,
+          "docsUrl": "https://docs.datadoghq.com/metrics/summary/#explore-your-custom-metrics"
+        },
+        {
+          "id": "high-volume-log-ingestion",
+          "title": "Massive log ingestion volume (2 900 GB/mo, $290/mo)",
+          "category": "logs",
+          "severity": "medium",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Your application sends ~2 900 GB of raw logs per month into Datadog ingestion pipelines. Much of this is debug or noisy heartbeat data that can be filtered at the Agent level before hitting network ingestion.",
+          "recommendation": "Configure log processing rules in the Datadog Agent (log_processing_rules: exclude_at_match) to discard health checks, router keep-alives, and debug payloads at source before network ingestion.",
+          "estMonthlySavingsMin": 71,
+          "estMonthlySavingsMax": 117,
+          "docsUrl": "https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfiles#filter-logs"
+        }
+      ],
+      "totals": {
+        "monthlySavingsMinUsd": 3184,
+        "monthlySavingsMaxUsd": 5122,
+        "annualizedSavingsMinUsd": 38208,
+        "annualizedSavingsMaxUsd": 61464,
+        "percentOfBillMin": 18.3,
+        "percentOfBillMax": 29.44
+      },
+      "cybersecurity": {
+        "postureGrade": "B",
+        "securityScore": 75,
+        "totalViolations": 1,
+        "criticalCount": 1,
+        "highCount": 0,
+        "estCostOfExposuresUsd": 145,
+        "findings": [
+          {
+            "id": "dlp-github-pat-llm.token.cost_per_prompt",
+            "patternId": "github-pat",
+            "name": "GitHub Personal Access Token",
+            "severity": "critical",
+            "sourceType": "metric_tag",
+            "sourceLocation": "llm.token.cost_per_prompt",
+            "detectedSamples": [
+              "ghp_••••••••9284"
+            ],
+            "complianceRisk": "Source Code Repository Exfiltration",
+            "remediation": "Revoke token on GitHub and configure pre-commit hooks + OTel filter.",
+            "impactedSeriesCount": 11000
+          }
+        ],
+        "scannedAt": "2026-09-03T01:00:55.181Z"
+      },
+      "executiveAiSummary": "Winnow Cyber & FinOps Intelligence: Security Grade: B (75/100). Identified $5 122/mo ($61 464/yr) in Datadog waste (~29.44% of invoice) + 1 telemetry data leaks quarantined.",
+      "pricing": {
+        "currency": "USD",
+        "customMetricsIncludedPerHost": 100,
+        "customMetricsOveragePer100PerMonth": 5,
+        "infraHostPerMonth": 15,
+        "apmHostPerMonth": 31,
+        "logsIngestedPerGb": 0.1,
+        "logsIndexedPerMillionEvents15d": 1.7,
+        "spansIndexedPerMillionEvents": 1.7,
+        "retentionMultipliers": {
+          "15": 1,
+          "30": 2,
+          "45": 3,
+          "60": 4,
+          "90": 6
+        },
+        "discountPercent": 0
+      },
+      "warnings": [],
+      "gitops": {
+        "safeRulesCount": 6,
+        "safetyScore": 98.5,
+        "prTitle": "[Winnow FinOps] Prune unqueried telemetry & activate DLP masking (-$1500/mo)",
+        "prBranch": "winnow/finops-remediation-1788397255181",
+        "hcl": "# ==============================================================================\n# WINNOW FINOPS & CYBER DEFENSE - GITOPS REMEDIATION PLAN\n# Generated: 2026-09-03T01:00:55.181Z\n# Mode: GitOps Zero-Write (Review in PR, Apply via Terraform Pipeline)\n# Estimated Monthly Savings: $1800 - $2600\n# ==============================================================================\n\nterraform {\n  required_providers {\n    datadog = {\n      source  = \"DataDog/datadog\"\n      version = \">= 3.30.0\"\n    }\n  }\n}\n\n# --- Automated Log Exclusion Filter for ai-traces ---\nresource \"datadog_logs_index\" \"log_filter_ai_traces\" {\n  name           = \"ai-traces\"\n  filter {\n    query = \"*\"\n  }\n  exclusion_filter {\n    name    = \"winnow_drop_unqueried_debug_logs\"\n    is_enabled = true\n    filter {\n      query = \"status:debug OR source:(trace-dump OR healthcheck)\"\n      sample_rate = 0.05 # Retain only 5% of debug noise\n    }\n  }\n}\n\n# --- Prune Orphaned Metric: llm.token.cost_per_prompt (11000 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_llm_token_cost_per_prompt\" {\n  metric_name = \"llm.token.cost_per_prompt\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Prune Orphaned Metric: rag.vector.similarity_score_v1 (3800 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_rag_vector_similarity_sco\" {\n  metric_name = \"rag.vector.similarity_score_v1\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Automated Log Exclusion Filter for raw-prompts-debug ---\nresource \"datadog_logs_index\" \"log_filter_raw_prompts_debug\" {\n  name           = \"raw-prompts-debug\"\n  filter {\n    query = \"*\"\n  }\n  exclusion_filter {\n    name    = \"winnow_drop_unqueried_debug_logs\"\n    is_enabled = true\n    filter {\n      query = \"status:debug OR source:(trace-dump OR healthcheck)\"\n      sample_rate = 0.05 # Retain only 5% of debug noise\n    }\n  }\n}\n\n# --- Strip Toxic High-Cardinality Tag \"session_id:sess_8832\" from agent.step.execution_time_ms ---\nresource \"datadog_metric_tag_configuration\" \"card_agent_step_execution_time_m\" {\n  metric_name = \"agent.step.execution_time_ms\"\n  metric_type = \"count\"\n  # Preserves only critical dimensions, dropping unbounded tags\n  tags        = [\"env\", \"service\", \"region\"]\n  include_percentiles = false\n}\n\n# --- Cyber Defense: Mask GitHub Personal Access Token in Telemetry Stream ---\nresource \"datadog_sensitive_data_scanner_rule\" \"sds_github_pat\" {\n  group_id    = \"datagroup_production\"\n  name        = \"Scrub GitHub Personal Access Token\"\n  pattern     = \"Bearer [a-zA-Z0-9_.-]+\"\n  action {\n    type = \"replacement\"\n    value = \"[REDACTED_BY_WINNOW]\"\n  }\n  is_enabled  = true\n}\n"
+      },
+      "aiSentry": {
+        "anomalies": [
+          {
+            "id": "anomaly-metrics-explosion",
+            "severity": "high",
+            "title": "High Metric-to-Host Ratio Detected (>150 metrics/host)",
+            "detail": "Your environment produces 275 custom metrics per host. Standard optimal baseline is <100. Indicates unchecked code instrumentation or loop emissions.",
+            "projectedMonthlyOverrun": 4200
+          }
+        ],
+        "unitEconomics": [
+          {
+            "service": "checkout-service",
+            "monthlySpendUsd": 1116,
+            "estimatedOps": 2339312,
+            "costPerMillionOpsUsd": 477.06,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "auth-service",
+            "monthlySpendUsd": 975,
+            "estimatedOps": 5485981,
+            "costPerMillionOpsUsd": 177.73,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "search-api",
+            "monthlySpendUsd": 900,
+            "estimatedOps": 4662966,
+            "costPerMillionOpsUsd": 193.01,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "payment-gateway",
+            "monthlySpendUsd": 1229,
+            "estimatedOps": 3902404,
+            "costPerMillionOpsUsd": 314.93,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "worker-queue",
+            "monthlySpendUsd": 952,
+            "estimatedOps": 3224682,
+            "costPerMillionOpsUsd": 295.22,
+            "efficiencyGrade": "Needs Optimization"
+          }
+        ],
+        "hibernation": {
+          "stagingHostsCount": 18,
+          "activeHoursPerWeek": 168,
+          "optimalSchedule": "Mon-Fri 08:00 - 19:00 UTC (55 hrs/wk)",
+          "potentialMonthlySavingsUsd": 302,
+          "hoursReclaimedWeekly": 113
+        }
+      },
+      "complianceBundle": {
+        "standard": "SOC 2 Type II / ISO 27001 Annex A.12 / HIPAA § 164.312",
+        "certifiedValid": true,
+        "chainLength": 4,
+        "persistenceStorage": "C:\\Users\\nidal\\.gemini\\antigravity-ide\\scratch\\winnow\\.winnow\\audit-ledger.jsonl",
+        "genesisHash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41",
+        "merkleRoot": "734be27c66b7ea9176a3e8fe3f524c0f2c53df6ed980cb17ae2cbbf957bc91bf",
+        "exportedAt": "2026-09-03T01:00:55.185Z",
+        "blocks": [
+          {
+            "index": 0,
+            "timestamp": "2026-09-03T01:00:55.169Z",
+            "event": "GENESIS_BLOCK",
+            "hash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41",
+            "previousHash": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "index": 1,
+            "timestamp": "2026-09-03T01:00:55.174Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "df60eb19bef034469d7020d33fd9c934f1b8322b293ada62801ef2abae7ed124",
+            "previousHash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41"
+          },
+          {
+            "index": 2,
+            "timestamp": "2026-09-03T01:00:55.179Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "4936ce70f050d7f859a82be0dce8d036eb608bf9635fdb2a37cd7e4f7161c33c",
+            "previousHash": "df60eb19bef034469d7020d33fd9c934f1b8322b293ada62801ef2abae7ed124"
+          },
+          {
+            "index": 3,
+            "timestamp": "2026-09-03T01:00:55.184Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "734be27c66b7ea9176a3e8fe3f524c0f2c53df6ed980cb17ae2cbbf957bc91bf",
+            "previousHash": "4936ce70f050d7f859a82be0dce8d036eb608bf9635fdb2a37cd7e4f7161c33c"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "company": "CarePulse Health (MedTech & Téléconsultation)",
+    "sector": "Santé Digitale & Télémédecine",
+    "profileDescription": "Données médicales ultra-sensibles (HIPAA / RGPD Santé), téléconsultations",
+    "audit": {
+      "meta": {
+        "org": "CarePulse Health",
+        "site": "datadoghq.eu",
+        "source": "prospect-scan",
+        "generatedAt": "2026-09-03T01:00:55.097Z",
+        "month": "2026-08"
+      },
+      "baseline": {
+        "customMetricsOverage": 1350,
+        "infra": 1650,
+        "apm": 2790,
+        "logsIngest": 180,
+        "logsIndexed": 4551.75,
+        "apmSpans": 476,
+        "other": 1900
+      },
+      "totalBaselineUsd": 12897.75,
+      "findings": [
+        {
+          "id": "log-index-hipaa-all-logs",
+          "title": "Log index \"hipaa-all-logs\" burns $4422/mo with zero exclusions and 90d retention",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Index \"hipaa-all-logs\" matches filter \"*\" and indexes ~434M events/month at 90d retention.",
+          "evidence": {
+            "index": "hipaa-all-logs",
+            "monthlyIndexedEventsM": 434,
+            "currentMonthlyCostUsd": 4422
+          },
+          "recommendation": "add exclusion filters for healthcheck/noise patterns (~20% typical); drop retention from 90d to 15d.",
+          "estMonthlySavingsMin": 2682,
+          "estMonthlySavingsMax": 4215,
+          "docsUrl": "https://docs.datadoghq.com/logs/indexes/"
+        },
+        {
+          "id": "orphaned-custom-metrics",
+          "title": "2 custom metrics are never queried anywhere",
+          "category": "custom_metrics",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.95,
+            "label": "Measured from usage data"
+          },
+          "description": "Cross-referencing your active metrics against every dashboard and monitor query found metrics that nobody has looked at in 30+ days, yet they keep generating billable time series.",
+          "evidence": {
+            "topOffenders": [
+              {
+                "metric": "patient.consultation.active_minutes",
+                "series": 7500
+              },
+              {
+                "metric": "db.health.patient_records_sync",
+                "series": 2900
+              }
+            ]
+          },
+          "recommendation": "Delete these metric names at the source (code/Agent config), or protect them with Metrics without Limits while you migrate. Re-run this audit after one billing cycle.",
+          "estMonthlySavingsMin": 442,
+          "estMonthlySavingsMax": 598,
+          "docsUrl": "https://docs.datadoghq.com/metrics/guide/custom_metrics_governance/"
+        },
+        {
+          "id": "span-tail-sampling",
+          "title": "APM spans are indexed unsampled ($476/mo)",
+          "category": "apm",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "~280M APM span events are retained every month with default sampling. Healthy traffic dominates the bill; errors and slow traces are what you actually debug.",
+          "evidence": {
+            "monthlyIndexedSpansM": 280,
+            "currentMonthlyCostUsd": 476
+          },
+          "recommendation": "Enable tail-sampling in the Datadog Agent or OTel Collector: keep 100% of error/slow traces, sample healthy ones to 10-20%. If you run both the Agent AND an OpenTelemetry pipeline on the same hosts, deduplicate before sampling.",
+          "estMonthlySavingsMin": 214,
+          "estMonthlySavingsMax": 375,
+          "docsUrl": "https://docs.datadoghq.com/tracing/sample_rates/#tail-sampling"
+        },
+        {
+          "id": "zombie-hosts-staging",
+          "title": "12 staging/dev hosts monitored 24/7",
+          "category": "hosts",
+          "severity": "medium",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Non-production environments run ~40h/week but their monitoring meters run 168h/week. You pay infra + APM around the clock for machines nobody watches overnight.",
+          "evidence": {
+            "groups": [
+              {
+                "env": "staging",
+                "hosts": 12
+              }
+            ]
+          },
+          "recommendation": "Schedule agents off-hours on non-prod (systemd timer / k8s cron scaling), or exclude dev/staging from APM billing pools. 73% saving is typical with business-hours-only monitoring.",
+          "estMonthlySavingsMin": 242,
+          "estMonthlySavingsMax": 403,
+          "docsUrl": "https://docs.datadoghq.com/account_management/billing/"
+        },
+        {
+          "id": "high-volume-log-ingestion",
+          "title": "Massive log ingestion volume (1 800 GB/mo, $180/mo)",
+          "category": "logs",
+          "severity": "medium",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Your application sends ~1 800 GB of raw logs per month into Datadog ingestion pipelines. Much of this is debug or noisy heartbeat data that can be filtered at the Agent level before hitting network ingestion.",
+          "recommendation": "Configure log processing rules in the Datadog Agent (log_processing_rules: exclude_at_match) to discard health checks, router keep-alives, and debug payloads at source before network ingestion.",
+          "estMonthlySavingsMin": 44,
+          "estMonthlySavingsMax": 72,
+          "docsUrl": "https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfiles#filter-logs"
+        },
+        {
+          "id": "log-index-frontend-errors",
+          "title": "Log index \"frontend-errors\" burns $130/mo with zero exclusions",
+          "category": "logs",
+          "severity": "medium",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Index \"frontend-errors\" matches filter \"status:error\" and indexes ~77M events/month at 15d retention.",
+          "evidence": {
+            "index": "frontend-errors",
+            "monthlyIndexedEventsM": 77,
+            "currentMonthlyCostUsd": 130
+          },
+          "recommendation": "add exclusion filters for healthcheck/noise patterns (~20% typical).",
+          "estMonthlySavingsMin": 18,
+          "estMonthlySavingsMax": 29,
+          "docsUrl": "https://docs.datadoghq.com/logs/indexes/"
+        }
+      ],
+      "totals": {
+        "monthlySavingsMinUsd": 3642,
+        "monthlySavingsMaxUsd": 5692,
+        "annualizedSavingsMinUsd": 43704,
+        "annualizedSavingsMaxUsd": 68304,
+        "percentOfBillMin": 28.24,
+        "percentOfBillMax": 44.13
+      },
+      "cybersecurity": {
+        "postureGrade": "A+",
+        "securityScore": 100,
+        "totalViolations": 0,
+        "criticalCount": 0,
+        "highCount": 0,
+        "estCostOfExposuresUsd": 0,
+        "findings": [],
+        "scannedAt": "2026-09-03T01:00:55.186Z"
+      },
+      "executiveAiSummary": "Winnow Cyber & FinOps Intelligence: Security Grade: A+ (100/100). Identified $5 692/mo ($68 304/yr) in Datadog waste (~44.13% of invoice) + 0 telemetry data leaks quarantined.",
+      "pricing": {
+        "currency": "USD",
+        "customMetricsIncludedPerHost": 100,
+        "customMetricsOveragePer100PerMonth": 5,
+        "infraHostPerMonth": 15,
+        "apmHostPerMonth": 31,
+        "logsIngestedPerGb": 0.1,
+        "logsIndexedPerMillionEvents15d": 1.7,
+        "spansIndexedPerMillionEvents": 1.7,
+        "retentionMultipliers": {
+          "15": 1,
+          "30": 2,
+          "45": 3,
+          "60": 4,
+          "90": 6
+        },
+        "discountPercent": 0
+      },
+      "warnings": [],
+      "gitops": {
+        "safeRulesCount": 4,
+        "safetyScore": 98.5,
+        "prTitle": "[Winnow FinOps] Prune unqueried telemetry & activate DLP masking (-$1500/mo)",
+        "prBranch": "winnow/finops-remediation-1788397255186",
+        "hcl": "# ==============================================================================\n# WINNOW FINOPS & CYBER DEFENSE - GITOPS REMEDIATION PLAN\n# Generated: 2026-09-03T01:00:55.186Z\n# Mode: GitOps Zero-Write (Review in PR, Apply via Terraform Pipeline)\n# Estimated Monthly Savings: $1800 - $2600\n# ==============================================================================\n\nterraform {\n  required_providers {\n    datadog = {\n      source  = \"DataDog/datadog\"\n      version = \">= 3.30.0\"\n    }\n  }\n}\n\n# --- Automated Log Exclusion Filter for hipaa-all-logs ---\nresource \"datadog_logs_index\" \"log_filter_hipaa_all_logs\" {\n  name           = \"hipaa-all-logs\"\n  filter {\n    query = \"*\"\n  }\n  exclusion_filter {\n    name    = \"winnow_drop_unqueried_debug_logs\"\n    is_enabled = true\n    filter {\n      query = \"status:debug OR source:(trace-dump OR healthcheck)\"\n      sample_rate = 0.05 # Retain only 5% of debug noise\n    }\n  }\n}\n\n# --- Prune Orphaned Metric: patient.consultation.active_minutes (7500 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_patient_consultation_acti\" {\n  metric_name = \"patient.consultation.active_minutes\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Prune Orphaned Metric: db.health.patient_records_sync (2900 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_db_health_patient_records\" {\n  metric_name = \"db.health.patient_records_sync\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Automated Log Exclusion Filter for frontend-errors ---\nresource \"datadog_logs_index\" \"log_filter_frontend_errors\" {\n  name           = \"frontend-errors\"\n  filter {\n    query = \"*\"\n  }\n  exclusion_filter {\n    name    = \"winnow_drop_unqueried_debug_logs\"\n    is_enabled = true\n    filter {\n      query = \"status:debug OR source:(trace-dump OR healthcheck)\"\n      sample_rate = 0.05 # Retain only 5% of debug noise\n    }\n  }\n}\n"
+      },
+      "aiSentry": {
+        "anomalies": [
+          {
+            "id": "anomaly-metrics-explosion",
+            "severity": "high",
+            "title": "High Metric-to-Host Ratio Detected (>150 metrics/host)",
+            "detail": "Your environment produces 345 custom metrics per host. Standard optimal baseline is <100. Indicates unchecked code instrumentation or loop emissions.",
+            "projectedMonthlyOverrun": 4050
+          }
+        ],
+        "unitEconomics": [
+          {
+            "service": "checkout-service",
+            "monthlySpendUsd": 729,
+            "estimatedOps": 3261928,
+            "costPerMillionOpsUsd": 223.49,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "auth-service",
+            "monthlySpendUsd": 989,
+            "estimatedOps": 2925250,
+            "costPerMillionOpsUsd": 338.09,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "search-api",
+            "monthlySpendUsd": 1186,
+            "estimatedOps": 1522649,
+            "costPerMillionOpsUsd": 778.91,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "payment-gateway",
+            "monthlySpendUsd": 516,
+            "estimatedOps": 5124538,
+            "costPerMillionOpsUsd": 100.69,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "worker-queue",
+            "monthlySpendUsd": 909,
+            "estimatedOps": 2478830,
+            "costPerMillionOpsUsd": 366.71,
+            "efficiencyGrade": "Needs Optimization"
+          }
+        ],
+        "hibernation": {
+          "stagingHostsCount": 12,
+          "activeHoursPerWeek": 168,
+          "optimalSchedule": "Mon-Fri 08:00 - 19:00 UTC (55 hrs/wk)",
+          "potentialMonthlySavingsUsd": 201,
+          "hoursReclaimedWeekly": 113
+        }
+      },
+      "complianceBundle": {
+        "standard": "SOC 2 Type II / ISO 27001 Annex A.12 / HIPAA § 164.312",
+        "certifiedValid": true,
+        "chainLength": 5,
+        "persistenceStorage": "C:\\Users\\nidal\\.gemini\\antigravity-ide\\scratch\\winnow\\.winnow\\audit-ledger.jsonl",
+        "genesisHash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41",
+        "merkleRoot": "1fca7eca503c5f8c415ddc6bf4f272cf15ffeeac93fca1d0d4d49d00ef50283e",
+        "exportedAt": "2026-09-03T01:00:55.189Z",
+        "blocks": [
+          {
+            "index": 0,
+            "timestamp": "2026-09-03T01:00:55.169Z",
+            "event": "GENESIS_BLOCK",
+            "hash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41",
+            "previousHash": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "index": 1,
+            "timestamp": "2026-09-03T01:00:55.174Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "df60eb19bef034469d7020d33fd9c934f1b8322b293ada62801ef2abae7ed124",
+            "previousHash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41"
+          },
+          {
+            "index": 2,
+            "timestamp": "2026-09-03T01:00:55.179Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "4936ce70f050d7f859a82be0dce8d036eb608bf9635fdb2a37cd7e4f7161c33c",
+            "previousHash": "df60eb19bef034469d7020d33fd9c934f1b8322b293ada62801ef2abae7ed124"
+          },
+          {
+            "index": 3,
+            "timestamp": "2026-09-03T01:00:55.184Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "734be27c66b7ea9176a3e8fe3f524c0f2c53df6ed980cb17ae2cbbf957bc91bf",
+            "previousHash": "4936ce70f050d7f859a82be0dce8d036eb608bf9635fdb2a37cd7e4f7161c33c"
+          },
+          {
+            "index": 4,
+            "timestamp": "2026-09-03T01:00:55.188Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "1fca7eca503c5f8c415ddc6bf4f272cf15ffeeac93fca1d0d4d49d00ef50283e",
+            "previousHash": "734be27c66b7ea9176a3e8fe3f524c0f2c53df6ed980cb17ae2cbbf957bc91bf"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "company": "ChainTrade (Crypto & High-Frequency Trading)",
+    "sector": "Web3 & Marchés Financiers Crypto",
+    "profileDescription": "Latence micro-seconde, pipelines Kafka / Redis volumineux",
+    "audit": {
+      "meta": {
+        "org": "ChainTrade Global",
+        "site": "datadoghq.com",
+        "source": "prospect-scan",
+        "generatedAt": "2026-09-03T01:00:55.097Z",
+        "month": "2026-08"
+      },
+      "baseline": {
+        "customMetricsOverage": 2450,
+        "infra": 4350,
+        "apm": 6510,
+        "logsIngest": 520,
+        "logsIndexed": 5168,
+        "apmSpans": 1564,
+        "other": 6800
+      },
+      "totalBaselineUsd": 27362,
+      "findings": [
+        {
+          "id": "log-index-orderbook-ticks",
+          "title": "Log index \"orderbook-ticks\" burns $3536/mo with zero exclusions and 30d retention",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Index \"orderbook-ticks\" matches filter \"source:matching\" and indexes ~1040M events/month at 30d retention.",
+          "evidence": {
+            "index": "orderbook-ticks",
+            "monthlyIndexedEventsM": 1040,
+            "currentMonthlyCostUsd": 3536
+          },
+          "recommendation": "add exclusion filters for healthcheck/noise patterns (~20% typical); drop retention from 30d to 15d.",
+          "estMonthlySavingsMin": 1485,
+          "estMonthlySavingsMax": 2334,
+          "docsUrl": "https://docs.datadoghq.com/logs/indexes/"
+        },
+        {
+          "id": "log-index-ws-gateway-debug",
+          "title": "Log index \"ws-gateway-debug\" burns $1632/mo with zero exclusions and 30d retention",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.95,
+            "label": "Measured from usage data"
+          },
+          "description": "Index \"ws-gateway-debug\" matches filter \"status:debug\" and indexes ~480M events/month at 30d retention.",
+          "evidence": {
+            "index": "ws-gateway-debug",
+            "monthlyIndexedEventsM": 480,
+            "currentMonthlyCostUsd": 1632
+          },
+          "recommendation": "add exclusion filters dropping debug/trace-dump sources (~60% of volume is never queried); drop retention from 30d to 15d.",
+          "estMonthlySavingsMin": 941,
+          "estMonthlySavingsMax": 1479,
+          "docsUrl": "https://docs.datadoghq.com/logs/indexes/"
+        },
+        {
+          "id": "span-tail-sampling",
+          "title": "APM spans are indexed unsampled ($1564/mo)",
+          "category": "apm",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "~920M APM span events are retained every month with default sampling. Healthy traffic dominates the bill; errors and slow traces are what you actually debug.",
+          "evidence": {
+            "monthlyIndexedSpansM": 920,
+            "currentMonthlyCostUsd": 1564
+          },
+          "recommendation": "Enable tail-sampling in the Datadog Agent or OTel Collector: keep 100% of error/slow traces, sample healthy ones to 10-20%. If you run both the Agent AND an OpenTelemetry pipeline on the same hosts, deduplicate before sampling.",
+          "estMonthlySavingsMin": 704,
+          "estMonthlySavingsMax": 1232,
+          "docsUrl": "https://docs.datadoghq.com/tracing/sample_rates/#tail-sampling"
+        },
+        {
+          "id": "orphaned-custom-metrics",
+          "title": "2 custom metrics are never queried anywhere",
+          "category": "custom_metrics",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.95,
+            "label": "Measured from usage data"
+          },
+          "description": "Cross-referencing your active metrics against every dashboard and monitor query found metrics that nobody has looked at in 30+ days, yet they keep generating billable time series.",
+          "evidence": {
+            "topOffenders": [
+              {
+                "metric": "orderbook.depth.spread_bps",
+                "series": 16000
+              },
+              {
+                "metric": "wallet.signer.rsa_validation",
+                "series": 4200
+              }
+            ]
+          },
+          "recommendation": "Delete these metric names at the source (code/Agent config), or protect them with Metrics without Limits while you migrate. Re-run this audit after one billing cycle.",
+          "estMonthlySavingsMin": 859,
+          "estMonthlySavingsMax": 1162,
+          "docsUrl": "https://docs.datadoghq.com/metrics/guide/custom_metrics_governance/"
+        },
+        {
+          "id": "high-volume-log-ingestion",
+          "title": "Massive log ingestion volume (5 200 GB/mo, $520/mo)",
+          "category": "logs",
+          "severity": "high",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Your application sends ~5 200 GB of raw logs per month into Datadog ingestion pipelines. Much of this is debug or noisy heartbeat data that can be filtered at the Agent level before hitting network ingestion.",
+          "recommendation": "Configure log processing rules in the Datadog Agent (log_processing_rules: exclude_at_match) to discard health checks, router keep-alives, and debug payloads at source before network ingestion.",
+          "estMonthlySavingsMin": 127,
+          "estMonthlySavingsMax": 209,
+          "docsUrl": "https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfiles#filter-logs"
+        },
+        {
+          "id": "zombie-hosts-staging",
+          "title": "35 staging/dev hosts monitored 24/7",
+          "category": "hosts",
+          "severity": "medium",
+          "confidence": {
+            "factor": 0.75,
+            "label": "Estimated (heuristic)"
+          },
+          "description": "Non-production environments run ~40h/week but their monitoring meters run 168h/week. You pay infra + APM around the clock for machines nobody watches overnight.",
+          "evidence": {
+            "groups": [
+              {
+                "env": "staging",
+                "hosts": 35
+              }
+            ]
+          },
+          "recommendation": "Schedule agents off-hours on non-prod (systemd timer / k8s cron scaling), or exclude dev/staging from APM billing pools. 73% saving is typical with business-hours-only monitoring.",
+          "estMonthlySavingsMin": 705,
+          "estMonthlySavingsMax": 1175,
+          "docsUrl": "https://docs.datadoghq.com/account_management/billing/"
+        }
+      ],
+      "totals": {
+        "monthlySavingsMinUsd": 4821,
+        "monthlySavingsMaxUsd": 7591,
+        "annualizedSavingsMinUsd": 57852,
+        "annualizedSavingsMaxUsd": 91092,
+        "percentOfBillMin": 17.62,
+        "percentOfBillMax": 27.74
+      },
+      "cybersecurity": {
+        "postureGrade": "A+",
+        "securityScore": 100,
+        "totalViolations": 0,
+        "criticalCount": 0,
+        "highCount": 0,
+        "estCostOfExposuresUsd": 0,
+        "findings": [],
+        "scannedAt": "2026-09-03T01:00:55.189Z"
+      },
+      "executiveAiSummary": "Winnow Cyber & FinOps Intelligence: Security Grade: A+ (100/100). Identified $7 591/mo ($91 092/yr) in Datadog waste (~27.74% of invoice) + 0 telemetry data leaks quarantined.",
+      "pricing": {
+        "currency": "USD",
+        "customMetricsIncludedPerHost": 100,
+        "customMetricsOveragePer100PerMonth": 5,
+        "infraHostPerMonth": 15,
+        "apmHostPerMonth": 31,
+        "logsIngestedPerGb": 0.1,
+        "logsIndexedPerMillionEvents15d": 1.7,
+        "spansIndexedPerMillionEvents": 1.7,
+        "retentionMultipliers": {
+          "15": 1,
+          "30": 2,
+          "45": 3,
+          "60": 4,
+          "90": 6
+        },
+        "discountPercent": 0
+      },
+      "warnings": [],
+      "gitops": {
+        "safeRulesCount": 4,
+        "safetyScore": 98.5,
+        "prTitle": "[Winnow FinOps] Prune unqueried telemetry & activate DLP masking (-$1500/mo)",
+        "prBranch": "winnow/finops-remediation-1788397255189",
+        "hcl": "# ==============================================================================\n# WINNOW FINOPS & CYBER DEFENSE - GITOPS REMEDIATION PLAN\n# Generated: 2026-09-03T01:00:55.189Z\n# Mode: GitOps Zero-Write (Review in PR, Apply via Terraform Pipeline)\n# Estimated Monthly Savings: $1800 - $2600\n# ==============================================================================\n\nterraform {\n  required_providers {\n    datadog = {\n      source  = \"DataDog/datadog\"\n      version = \">= 3.30.0\"\n    }\n  }\n}\n\n# --- Automated Log Exclusion Filter for orderbook-ticks ---\nresource \"datadog_logs_index\" \"log_filter_orderbook_ticks\" {\n  name           = \"orderbook-ticks\"\n  filter {\n    query = \"*\"\n  }\n  exclusion_filter {\n    name    = \"winnow_drop_unqueried_debug_logs\"\n    is_enabled = true\n    filter {\n      query = \"status:debug OR source:(trace-dump OR healthcheck)\"\n      sample_rate = 0.05 # Retain only 5% of debug noise\n    }\n  }\n}\n\n# --- Automated Log Exclusion Filter for ws-gateway-debug ---\nresource \"datadog_logs_index\" \"log_filter_ws_gateway_debug\" {\n  name           = \"ws-gateway-debug\"\n  filter {\n    query = \"*\"\n  }\n  exclusion_filter {\n    name    = \"winnow_drop_unqueried_debug_logs\"\n    is_enabled = true\n    filter {\n      query = \"status:debug OR source:(trace-dump OR healthcheck)\"\n      sample_rate = 0.05 # Retain only 5% of debug noise\n    }\n  }\n}\n\n# --- Prune Orphaned Metric: orderbook.depth.spread_bps (16000 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_orderbook_depth_spread_bp\" {\n  metric_name = \"orderbook.depth.spread_bps\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n\n# --- Prune Orphaned Metric: wallet.signer.rsa_validation (4200 series) ---\nresource \"datadog_metric_tag_configuration\" \"metric_wallet_signer_rsa_validat\" {\n  metric_name = \"wallet.signer.rsa_validation\"\n  metric_type = \"gauge\"\n  tags        = [\"env\", \"service\"]\n  include_percentiles = false\n}\n"
+      },
+      "aiSentry": {
+        "anomalies": [
+          {
+            "id": "anomaly-metrics-explosion",
+            "severity": "high",
+            "title": "High Metric-to-Host Ratio Detected (>150 metrics/host)",
+            "detail": "Your environment produces 269 custom metrics per host. Standard optimal baseline is <100. Indicates unchecked code instrumentation or loop emissions.",
+            "projectedMonthlyOverrun": 7350
+          }
+        ],
+        "unitEconomics": [
+          {
+            "service": "checkout-service",
+            "monthlySpendUsd": 982,
+            "estimatedOps": 2559967,
+            "costPerMillionOpsUsd": 383.6,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "auth-service",
+            "monthlySpendUsd": 1020,
+            "estimatedOps": 5012265,
+            "costPerMillionOpsUsd": 203.5,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "search-api",
+            "monthlySpendUsd": 504,
+            "estimatedOps": 2968360,
+            "costPerMillionOpsUsd": 169.79,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "payment-gateway",
+            "monthlySpendUsd": 591,
+            "estimatedOps": 4842312,
+            "costPerMillionOpsUsd": 122.05,
+            "efficiencyGrade": "Needs Optimization"
+          },
+          {
+            "service": "worker-queue",
+            "monthlySpendUsd": 1246,
+            "estimatedOps": 1901767,
+            "costPerMillionOpsUsd": 655.18,
+            "efficiencyGrade": "Needs Optimization"
+          }
+        ],
+        "hibernation": {
+          "stagingHostsCount": 35,
+          "activeHoursPerWeek": 168,
+          "optimalSchedule": "Mon-Fri 08:00 - 19:00 UTC (55 hrs/wk)",
+          "potentialMonthlySavingsUsd": 587,
+          "hoursReclaimedWeekly": 113
+        }
+      },
+      "complianceBundle": {
+        "standard": "SOC 2 Type II / ISO 27001 Annex A.12 / HIPAA § 164.312",
+        "certifiedValid": true,
+        "chainLength": 6,
+        "persistenceStorage": "C:\\Users\\nidal\\.gemini\\antigravity-ide\\scratch\\winnow\\.winnow\\audit-ledger.jsonl",
+        "genesisHash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41",
+        "merkleRoot": "2006e026d97555ac8379f3fda959cb4ff47b50ae96b19195638571d47cbdcfaa",
+        "exportedAt": "2026-09-03T01:00:55.192Z",
+        "blocks": [
+          {
+            "index": 0,
+            "timestamp": "2026-09-03T01:00:55.169Z",
+            "event": "GENESIS_BLOCK",
+            "hash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41",
+            "previousHash": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "index": 1,
+            "timestamp": "2026-09-03T01:00:55.174Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "df60eb19bef034469d7020d33fd9c934f1b8322b293ada62801ef2abae7ed124",
+            "previousHash": "44357d4e1c724c950faa2076d7e4cb7c3c3a1af07a6059c507b9422ffa0edd41"
+          },
+          {
+            "index": 2,
+            "timestamp": "2026-09-03T01:00:55.179Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "4936ce70f050d7f859a82be0dce8d036eb608bf9635fdb2a37cd7e4f7161c33c",
+            "previousHash": "df60eb19bef034469d7020d33fd9c934f1b8322b293ada62801ef2abae7ed124"
+          },
+          {
+            "index": 3,
+            "timestamp": "2026-09-03T01:00:55.184Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "734be27c66b7ea9176a3e8fe3f524c0f2c53df6ed980cb17ae2cbbf957bc91bf",
+            "previousHash": "4936ce70f050d7f859a82be0dce8d036eb608bf9635fdb2a37cd7e4f7161c33c"
+          },
+          {
+            "index": 4,
+            "timestamp": "2026-09-03T01:00:55.188Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "1fca7eca503c5f8c415ddc6bf4f272cf15ffeeac93fca1d0d4d49d00ef50283e",
+            "previousHash": "734be27c66b7ea9176a3e8fe3f524c0f2c53df6ed980cb17ae2cbbf957bc91bf"
+          },
+          {
+            "index": 5,
+            "timestamp": "2026-09-03T01:00:55.191Z",
+            "event": "TELEMETRY_FINOPS_SECURITY_AUDIT",
+            "hash": "2006e026d97555ac8379f3fda959cb4ff47b50ae96b19195638571d47cbdcfaa",
+            "previousHash": "1fca7eca503c5f8c415ddc6bf4f272cf15ffeeac93fca1d0d4d49d00ef50283e"
+          }
+        ]
+      }
+    }
+  }
+]
