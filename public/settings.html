@@ -2,114 +2,523 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Winnow - API Settings (Infisical)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winnow — FinOps Preferences & Cloud Cost Alerting</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #070B11;
-      --surface: rgba(15, 23, 42, 0.7);
-      --border: rgba(255, 255, 255, 0.1);
-      --accent: #8B5CF6;
+      --bg-dark: #090a10;
+      --card-bg: rgba(16, 18, 28, 0.8);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --accent-purple: #a855f7;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-rose: #f43f5e;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #64748b;
+      --sidebar-width: 220px;
     }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
     body {
-      margin: 0; padding: 0; font-family: 'Inter', sans-serif;
-      background: var(--bg); color: #F8FAFC;
-      display: flex; height: 100vh;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(168, 85, 247, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+      background-attachment: fixed;
     }
-    aside {
-      width: 250px; background: rgba(0,0,0,0.5); border-right: 1px solid var(--border);
-      padding: 24px; box-sizing: border-box;
+
+    /* Left Sidebar */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      background: rgba(10, 11, 18, 0.95);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
     }
-    .logo {
-      font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 40px;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 10px 32px 10px;
+      text-decoration: none;
+      color: inherit;
     }
-    .logo span { color: var(--accent); }
-    nav a {
-      display: block; padding: 12px; color: #94A3B8; text-decoration: none; border-radius: 8px; margin-bottom: 8px;
+
+    .brand-logo {
+      width: 28px;
+      height: 28px;
     }
-    nav a:hover, nav a.active {
-      background: rgba(255,255,255,0.05); color: #fff;
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
     }
-    main {
-      flex: 1; padding: 40px; overflow-y: auto;
+
+    nav.nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
     }
-    .glass-panel {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-      backdrop-filter: blur(20px); padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
     }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
-    th { color: #94A3B8; font-weight: 600; }
+
+    .nav-item svg { width: 18px; height: 18px; stroke-width: 1.75; }
+
+    .nav-item:hover {
+      color: #f1f5f9;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-item.active {
+      color: #ffffff;
+      background: rgba(30, 32, 48, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-item.active svg { color: var(--accent-purple); }
+
+    /* Main Container */
+    main.main-content {
+      flex: 1;
+      padding: 36px 44px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      overflow-y: auto;
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+
+    .trust-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .trust-pill span.dot {
+      width: 7px;
+      height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    /* Settings Bento Grid */
+    .settings-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .settings-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 26px 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-header {
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Option Rows */
+    .option-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .option-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .option-info {
+      max-width: 75%;
+    }
+
+    .option-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 2px;
+    }
+
+    .option-sub {
+      font-size: 12.5px;
+      color: var(--text-dim);
+    }
+
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 2px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #a855f7;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Inputs */
+    .input-field {
+      background: rgba(26, 29, 46, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      width: 180px;
+    }
+
+    /* Sources Table */
+    .sources-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .sources-table th {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .sources-table td {
+      font-size: 13px;
+      color: #e2e8f0;
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-live { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .badge-offline { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+
+    .btn-save {
+      background: linear-gradient(135deg, #a855f7, #d946ef);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .btn-save:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 24px rgba(168, 85, 247, 0.6);
+    }
   </style>
 </head>
 <body>
-  <aside>
-    <div class="logo"><span>W</span> winnow</div>
-    <nav>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="#">Cost Explorer</a>
-      <a href="#">Anomalies</a>
-      <a href="settings.html" class="active">Settings (API)</a>
+
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <a href="/" class="brand">
+      <svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 10L11 24L16 13L21 24L26 10" stroke="url(#w-grad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="w-grad" x1="6" y1="10" x2="26" y2="24" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#38BDF8"/>
+            <stop offset="0.5" stop-color="#A855F7"/>
+            <stop offset="1" stop-color="#EC4899"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="brand-name">winnow</span>
+    </a>
+
+    <nav class="nav-list">
+      <a href="/dashboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="/dashboard.html#cost" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Cost Explorer</span>
+      </a>
+      <a href="/dashboard.html#anomalies" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Anomalies</span>
+      </a>
+      <a href="/settings.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>FinOps Settings</span>
+      </a>
     </nav>
   </aside>
-  <main>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-      <h1 style="margin: 0; font-size: 24px;">API Key Management & Security</h1>
-      <span style="color: #10B981; font-size: 12px; font-weight: 700;">● Infisical Connection: Healthy</span>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="header-section">
+      <div>
+        <h1 class="page-title">FinOps Cost Alerting & Optimization Policies</h1>
+        <p style="font-size: 13.5px; color: #94a3b8; margin-top: 4px;">Configure automated waste prevention, budget drift notifications, and connected cloud telemetry sources.</p>
+      </div>
+      <div class="trust-pill">
+        <span class="dot"></span>
+        <span>Zero-Credential Enclave Protected</span>
+      </div>
     </div>
 
-    <div class="glass-panel">
-      <h2 style="margin: 0 0 16px; font-size: 16px;">Infisical Secret Vaults</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Vault Name</th>
-            <th>Environment</th>
-            <th>Key Count</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Global-Production (Default)</td>
-            <td>Production</td>
-            <td>8 Keys</td>
-            <td style="color: #38BDF8;">Synced with Infisical</td>
-          </tr>
-          <tr>
-            <td>E-commerce-Staging</td>
-            <td>Staging</td>
-            <td>3 Keys</td>
-            <td style="color: #38BDF8;">Synced with Infisical</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="settings-grid">
+      <!-- Card 1: Budget & Anomaly Detection Thresholds -->
+      <div class="settings-card">
+        <div class="card-header">
+          <h2 class="card-title">1. Budget & Spend Anomaly Alerting</h2>
+          <p class="card-desc">Trigger proactive alerts before unoptimized telemetry impacts your month-end cloud invoice.</p>
+        </div>
 
-      <h2 style="margin: 32px 0 16px; font-size: 16px;">Current API Keys</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>API Key</th>
-            <th>Environment</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Stripe-Integration</td>
-            <td style="font-family: monospace;">pk_live_**************</td>
-            <td>Default</td>
-            <td style="color: #10B981;">Active</td>
-            <td>
-              <a href="#" style="color: #38BDF8; margin-right: 8px;">Edit</a>
-              <a href="#" style="color: #10B981; margin-right: 8px;">Rotate</a>
-              <a href="#" style="color: #EF4444;">Revoke</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <div class="option-row">
+          <div class="option-info">
+            <div class="option-title">Monthly Observability Budget Cap</div>
+            <div class="option-sub">Alert when total projected Datadog/Cloud spend is on track to breach this threshold.</div>
+          </div>
+          <input type="text" class="input-field" value="$15,000 / mo" id="budgetCap">
+        </div>
+
+        <div class="option-row">
+          <div class="option-info">
+            <div class="option-title">Rapid Spend Spike Alert (15% in 24h)</div>
+            <div class="option-sub">Detect unexpected metric cardinality explosions or runaway debug log streams instantly.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="option-row">
+          <div class="option-info">
+            <div class="option-title">Weekly FinOps Executive Digest</div>
+            <div class="option-sub">Email a quantified summary of eliminated waste and dollar savings to stakeholders.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Card 2: Waste Pruning Policies -->
+      <div class="settings-card">
+        <div class="card-header">
+          <h2 class="card-title">2. Automated Observability Pruning Rules</h2>
+          <p class="card-desc">Define rules to automatically flag and clean idle metrics, orphan logs, and unused telemetry.</p>
+        </div>
+
+        <div class="option-row">
+          <div class="option-info">
+            <div class="option-title">Auto-flag Unqueried Custom Metrics (>90 Days)</div>
+            <div class="option-sub">Identify Datadog metrics that have not been queried on any dashboard or monitor for 90 days.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="option-row">
+          <div class="option-info">
+            <div class="option-title">Debug Log Retention Enforcer (14-Day Max TTL)</div>
+            <div class="option-sub">Recommend 14-day retention limits on verbose non-production CloudWatch & Datadog log groups.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="option-row">
+          <div class="option-info">
+            <div class="option-title">APM Trace Adaptive Downsampling</div>
+            <div class="option-sub">Sample 100% of HTTP 5xx errors while downsampling redundant HTTP 200 healthcheck traces to 1%.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Card 3: Connected Audit Sources -->
+      <div class="settings-card">
+        <div class="card-header">
+          <h2 class="card-title">3. Connected Cloud & Observability Sources</h2>
+          <p class="card-desc">All connections use strictly read-only scoped permissions. No customer credentials or private data are ever retained.</p>
+        </div>
+
+        <table class="sources-table">
+          <thead>
+            <tr>
+              <th>Integration Name</th>
+              <th>Mode / Scope</th>
+              <th>Audit Frequency</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div style="font-weight: 700; color: #ffffff;">Datadog Observability Enclave</div>
+                <div style="font-size: 11px; color: var(--text-dim);">Usage & Metrics Read-Only</div>
+              </td>
+              <td>100% Read-Only API</td>
+              <td>Hourly Drift Scan</td>
+              <td><span class="status-badge badge-live">● Active & Monitored</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 700; color: #ffffff;">Terraform Offline Code Audit</div>
+                <div style="font-size: 11px; color: var(--text-dim);">Zero-Credential .tf Parser</div>
+              </td>
+              <td>Local Browser Memory</td>
+              <td>On File Upload</td>
+              <td><span class="status-badge badge-offline">● Offline Enclave</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 700; color: #ffffff;">AWS CloudWatch & EKS Metrics</div>
+                <div style="font-size: 11px; color: var(--text-dim);">Cost Allocation Tags</div>
+              </td>
+              <td>CostExplorer:GetCost</td>
+              <td>Daily Cost Summary</td>
+              <td><span class="status-badge badge-live">● Connected</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+        <button class="btn-save" onclick="saveSettings()">Save FinOps Preferences</button>
+      </div>
     </div>
   </main>
+
+  <script>
+    function saveSettings() {
+      alert('FinOps Alerting Preferences Saved!\n\n• Monthly Budget Cap: ' + document.getElementById('budgetCap').value + '\n• Auto-pruning policies active.\n• Zero-credential enclave verified.');
+    }
+  </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
-    "deploymentEnabled": false
+    "deploymentEnabled": true
   },
   "functions": {
     "api/audit.mjs": { "maxDuration": 60 },
@@ -11,6 +11,7 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/settings", "destination": "/settings.html" },
     { "source": "/api/paystack/initialize", "destination": "/api/paystack-initialize.mjs" },
     { "source": "/api/paystack/webhook", "destination": "/api/paystack-webhook.mjs" }
   ]
