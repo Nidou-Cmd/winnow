@@ -8,7 +8,9 @@
     "api/paystack-initialize.mjs": { "maxDuration": 30 },
     "api/paystack-webhook.mjs": { "maxDuration": 30 }
   },
+  "cleanUrls": true,
   "rewrites": [
+    { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/api/paystack/initialize", "destination": "/api/paystack-initialize.mjs" },
     { "source": "/api/paystack/webhook", "destination": "/api/paystack-webhook.mjs" }
   ]

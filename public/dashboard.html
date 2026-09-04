@@ -1,328 +1,768 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Winnow - Zero-Trust API Gateway</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg-color: #020617;
-    --sidebar-bg: #0b0f19;
-    --card-bg: rgba(15, 23, 42, 0.6);
-    --card-border: rgba(255, 255, 255, 0.05);
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent-purple: #c084fc;
-    --accent-purple-glow: rgba(192, 132, 252, 0.4);
-    --accent-green: #34d399;
-    --accent-red: #f87171;
-    --accent-blue: #38bdf8;
-    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winnow — Zero-Trust API Gateway & FinOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090a10;
+      --card-bg: rgba(16, 18, 28, 0.75);
+      --card-surface: #10121d;
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-glow-purple: rgba(168, 85, 247, 0.35);
+      --border-glow-cyan: rgba(6, 182, 212, 0.35);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --accent-purple: #a855f7;
+      --accent-purple-light: #c084fc;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-emerald: #34d399;
+      --accent-rose: #f43f5e;
+      --sidebar-width: 220px;
+    }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-  
-  body {
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-    background-image: 
-      radial-gradient(circle at 80% 20%, rgba(192, 132, 252, 0.08) 0%, transparent 40%),
-      radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.05) 0%, transparent 40%);
-  }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
 
-  /* Sidebar */
-  .sidebar {
-    width: 250px;
-    background-color: var(--sidebar-bg);
-    border-right: var(--glass-border);
-    padding: 24px 16px;
-    display: flex;
-    flex-direction: column;
-    z-index: 10;
-  }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 90% 15%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 90%, rgba(168, 85, 247, 0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
 
-  .logo {
-    font-size: 20px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 40px;
-    padding-left: 12px;
-  }
-  .logo-icon { width: 24px; height: 24px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 12h5l3.5-7 4.5 14 3-7h2" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat center; mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 12h5l3.5-7 4.5 14 3-7h2" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat center; }
+    /* Left Sidebar */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      background: rgba(10, 11, 18, 0.95);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
 
-  .menu { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-  .menu-item {
-    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
-    border-radius: 8px; color: var(--text-muted); font-size: 14px;
-    font-weight: 500; cursor: pointer; transition: all 0.2s;
-  }
-  .menu-item:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
-  .menu-item.active {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-main);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
-  }
-  
-  .menu-item svg { width: 18px; height: 18px; opacity: 0.7; }
-  .menu-item.active svg { opacity: 1; color: var(--accent-purple); }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 10px 32px 10px;
+      text-decoration: none;
+      color: inherit;
+    }
 
-  /* Main Content */
-  .main-content {
-    flex: 1; padding: 32px 40px; overflow-y: auto;
-  }
+    .brand-logo {
+      width: 28px;
+      height: 28px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-  .header { margin-bottom: 24px; }
-  .header h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+    .brand-logo svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.6));
+    }
 
-  .dashboard-container {
-    background: rgba(15, 23, 42, 0.4);
-    border: var(--glass-border);
-    border-radius: 16px;
-    padding: 24px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 24px 40px rgba(0,0,0,0.4);
-  }
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
 
-  .top-controls {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
-  }
-  .top-controls h2 { font-size: 16px; font-weight: 500; }
-  .controls-right { display: flex; gap: 16px; align-items: center; }
-  
-  .period-select {
-    background: rgba(0,0,0,0.3); border: var(--glass-border);
-    color: var(--text-muted); padding: 6px 12px; border-radius: 6px;
-    font-size: 13px; outline: none; appearance: none; cursor: pointer;
-  }
+    nav.nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
 
-  .btn-primary {
-    background: linear-gradient(135deg, #a855f7, #c084fc);
-    color: #fff; border: none; padding: 8px 16px; border-radius: 6px;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    box-shadow: 0 0 15px var(--accent-purple-glow);
-    transition: all 0.2s;
-  }
-  .btn-primary:hover { box-shadow: 0 0 20px rgba(192, 132, 252, 0.6); filter: brightness(1.1); }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
 
-  /* Cards Grid */
-  .cards-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;
-  }
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 1.75;
+      color: #94a3b8;
+      transition: color 0.2s ease;
+    }
 
-  .card {
-    background: var(--card-bg);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 12px;
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  /* Glowing borders for specific cards to match mockup */
-  .card:nth-child(1) { border-color: rgba(192, 132, 252, 0.3); box-shadow: 0 4px 20px rgba(192, 132, 252, 0.05); }
-  .card:nth-child(2) { border-color: rgba(52, 211, 153, 0.2); box-shadow: 0 4px 20px rgba(52, 211, 153, 0.05); }
-  .card:nth-child(3) { border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 4px 20px rgba(56, 189, 248, 0.05); }
-  .card:nth-child(4) { border-color: rgba(192, 132, 252, 0.2); box-shadow: 0 4px 20px rgba(192, 132, 252, 0.05); }
+    .nav-item:hover {
+      color: #f1f5f9;
+      background: rgba(255, 255, 255, 0.04);
+    }
 
-  .card-title { font-size: 13px; color: var(--text-main); font-weight: 500; margin-bottom: 12px; }
-  
-  .card-value-large { font-size: 28px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: baseline; gap: 8px;}
-  .card-value-large .trend { font-size: 13px; color: var(--accent-green); font-weight: 600; }
-  
-  .card-sub { font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; margin-bottom: 16px;}
-  .card-sub span:last-child { color: var(--text-main); }
+    .nav-item.active {
+      color: #ffffff;
+      background: rgba(30, 32, 48, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
 
-  .card-status-text { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-  .text-green { color: var(--accent-green); }
-  .text-red { color: var(--accent-red); }
-  
-  .card-details { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-  
-  .chart-area { height: 60px; width: 100%; position: relative; margin-top: auto; }
-  
-  /* SVG Charts styling */
-  .sparkline { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .sparkline-purple { stroke: var(--accent-purple); filter: drop-shadow(0 4px 6px rgba(192, 132, 252, 0.3)); }
-  .sparkline-blue { stroke: var(--accent-blue); filter: drop-shadow(0 4px 6px rgba(56, 189, 248, 0.3)); }
-  
-  .chart-gradient-fill { fill: url(#purple-grad); opacity: 0.2; }
-  .chart-gradient-fill-blue { fill: url(#blue-grad); opacity: 0.2; }
+    .nav-item.active svg {
+      color: var(--accent-purple-light);
+    }
 
-  /* Donut Chart */
-  .donut-container { position: absolute; right: 10px; top: 30px; width: 50px; height: 50px; }
-  .donut-bg { fill: transparent; stroke: rgba(255,255,255,0.1); stroke-width: 6; }
-  .donut-segment { fill: transparent; stroke: var(--accent-blue); stroke-width: 6; stroke-dasharray: 85 15; stroke-linecap: round; filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.5)); }
+    .nav-bottom {
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+    }
 
-  /* Table */
-  .table-container {
-    background: rgba(0, 0, 0, 0.2);
-    border: var(--glass-border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  
-  .table-header { padding: 16px; border-bottom: var(--glass-border); font-size: 14px; font-weight: 500; }
-  
-  table { width: 100%; border-collapse: collapse; text-align: left; }
-  th { font-size: 11px; color: var(--text-muted); font-weight: 500; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-  td { font-size: 13px; color: var(--text-main); padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); }
-  tr:last-child td { border-bottom: none; }
-  
-  .status-icon { display: inline-flex; justify-content: center; align-items: center; width: 16px; height: 16px; border-radius: 50%; background: rgba(52, 211, 153, 0.2); color: var(--accent-green); font-size: 10px; margin-right: 6px;}
-  .shield-icon { color: var(--accent-blue); margin-right: 6px; font-size: 12px; }
+    /* Main Container */
+    main.main-content {
+      flex: 1;
+      padding: 32px 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
 
-</style>
+    /* Header */
+    header.dash-header {
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      margin-bottom: 18px;
+    }
+
+    .control-bar {
+      background: rgba(17, 19, 31, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .control-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .control-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .period-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .period-select {
+      background: rgba(26, 29, 46, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .btn-anomaly {
+      background: linear-gradient(135deg, #a855f7 0%, #d946ef 100%);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-anomaly:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 24px rgba(168, 85, 247, 0.65);
+    }
+
+    .btn-anomaly:active {
+      transform: translateY(0);
+    }
+
+    /* 4 Top KPI Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: rgba(16, 18, 29, 0.8);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 190px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .kpi-card.purple-glow {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(168, 85, 247, 0.08);
+      border-color: rgba(168, 85, 247, 0.25);
+    }
+
+    .kpi-card.cyan-glow {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(6, 182, 212, 0.08);
+      border-color: rgba(6, 182, 212, 0.25);
+    }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .kpi-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .kpi-stat-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .kpi-big-num {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+
+    .kpi-badge-green {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .kpi-sub-text {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .kpi-sub-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-top: 4px;
+    }
+
+    /* Chart Containers inside Cards */
+    .sparkline-svg {
+      width: 100%;
+      height: 64px;
+      overflow: visible;
+      margin-top: 8px;
+    }
+
+    .donut-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .donut-svg {
+      width: 76px;
+      height: 76px;
+      transform: rotate(-90deg);
+    }
+
+    .token-active-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #34d399;
+      margin-top: 6px;
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    /* Bottom Endpoints Card */
+    .endpoints-card {
+      background: rgba(16, 18, 29, 0.8);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .endpoints-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .endpoints-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .search-box {
+      background: rgba(26, 29, 46, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 260px;
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #f8fafc;
+      font-size: 13px;
+      width: 100%;
+    }
+
+    .search-box input::placeholder {
+      color: #64748b;
+    }
+
+    /* Table Styles */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table.endpoints-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    table.endpoints-table th {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      text-transform: capitalize;
+    }
+
+    table.endpoints-table td {
+      font-size: 13px;
+      color: #cbd5e1;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+      transition: background 0.15s ease;
+    }
+
+    table.endpoints-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+    }
+
+    .col-endpoint {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      color: #f1f5f9;
+      font-weight: 500;
+    }
+
+    .col-resource {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .badge-auth {
+      background: rgba(168, 85, 247, 0.12);
+      color: #c084fc;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-active {
+      background: rgba(6, 182, 212, 0.12);
+      color: #22d3ee;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-shield {
+      width: 18px;
+      height: 18px;
+      color: #38bdf8;
+    }
+
+    .icon-check {
+      width: 18px;
+      height: 18px;
+      color: #34d399;
+    }
+
+    /* Modal for Anomaly Scanner */
+    .scanner-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .scanner-modal {
+      background: #111422;
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      box-shadow: 0 0 50px rgba(168, 85, 247, 0.25);
+      border-radius: 16px;
+      width: 520px;
+      max-width: 90%;
+      padding: 32px;
+      position: relative;
+    }
+
+    .scanner-progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .scanner-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #a855f7, #06b6d4);
+      box-shadow: 0 0 12px #a855f7;
+      transition: width 0.3s ease;
+    }
+
+    .scanner-log {
+      background: #080a10;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #94a3b8;
+      height: 140px;
+      overflow-y: auto;
+    }
+
+    .scanner-log p { margin-bottom: 6px; }
+    .scanner-log .log-success { color: #34d399; }
+    .scanner-log .log-highlight { color: #c084fc; }
+
+    @media (max-width: 1024px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      body { flex-direction: column; }
+      aside.sidebar { width: 100%; height: auto; position: relative; }
+    }
+  </style>
 </head>
 <body>
 
+  <!-- Left Sidebar -->
   <aside class="sidebar">
-    <div class="logo">
-      <div class="logo-icon"></div>
-      winnow
+    <a href="/" class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 10L11 24L16 13L21 24L26 10" stroke="url(#w-grad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="w-grad" x1="6" y1="10" x2="26" y2="24" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#38BDF8"/>
+              <stop offset="0.5" stop-color="#A855F7"/>
+              <stop offset="1" stop-color="#EC4899"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span class="brand-name">winnow</span>
+    </a>
+
+    <nav class="nav-list">
+      <div class="nav-item" onclick="switchTab('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span>Dashboard</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('cost')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Cost Explorer</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('anomalies')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Anomalies</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('resource')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        <span>Resource Map</span>
+      </div>
+      <div class="nav-item active" onclick="switchTab('apis')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <span>APIs</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('reports')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Reports</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('alerts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Alerts</span>
+      </div>
+    </nav>
+
+    <div class="nav-bottom">
+      <a href="/settings.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </a>
     </div>
-    <ul class="menu">
-      <li class="menu-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-        Dashboard
-      </li>
-      <li class="menu-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-        Cost Explorer
-      </li>
-      <li class="menu-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Anomalies
-      </li>
-      <li class="menu-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-        Resource Map
-      </li>
-      <li class="menu-item active">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-        APIs
-      </li>
-      <li class="menu-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-        Reports
-      </li>
-      <li class="menu-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-        Alerts
-      </li>
-      <li class="menu-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-        Settings
-      </li>
-    </ul>
   </aside>
 
+  <!-- Main Content -->
   <main class="main-content">
-    <div class="header">
-      <h1>Zero-Trust API Gateway</h1>
-    </div>
+    <header class="dash-header">
+      <h1 class="page-title">Zero-Trust API Gateway</h1>
+      
+      <div class="control-bar">
+        <div class="control-title">API Gateway: Zero-Trust Overview</div>
+        <div class="control-actions">
+          <div class="period-selector">
+            <span>Period:</span>
+            <select class="period-select" id="periodSelect" onchange="updatePeriod(this.value)">
+              <option value="30">Last 30 Days</option>
+              <option value="7">Last 7 Days</option>
+              <option value="24">Last 24 Hours</option>
+              <option value="90">Last 90 Days</option>
+            </select>
+          </div>
+          <button class="btn-anomaly" onclick="openScanner()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Run Anomaly Scan
+          </button>
+        </div>
+      </div>
+    </header>
 
-    <div class="dashboard-container">
-      <div class="top-controls">
-        <h2>API Gateway: Zero-Trust Overview</h2>
-        <div class="controls-right">
-          <span style="font-size: 13px; color: var(--text-muted);">Period:</span>
-          <select class="period-select">
-            <option>Last 30 Days</option>
-            <option>Last 7 Days</option>
-            <option>Last 24 Hours</option>
-          </select>
-          <button class="btn-primary">Run Anomaly Scan</button>
+    <!-- 4 KPI Cards Matching Mockup -->
+    <section class="kpi-grid">
+      <!-- Card 1: API Usage -->
+      <div class="kpi-card purple-glow">
+        <div>
+          <div class="kpi-header">
+            <span class="kpi-title">API Usage</span>
+          </div>
+          <div class="kpi-stat-row">
+            <span class="kpi-big-num" id="statApiUsage">2.1M</span>
+            <span class="kpi-badge-green">+14% Avg</span>
+          </div>
+          <div class="kpi-sub-text">Total Requests</div>
+          <div class="kpi-sub-val" id="statErrMin">5K <span style="font-size: 12px; font-weight: 500; color: #94a3b8;">Err/Min</span></div>
+        </div>
+
+        <!-- Violet Area Sparkline with Peak Dot -->
+        <svg class="sparkline-svg" viewBox="0 0 240 60" fill="none">
+          <defs>
+            <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="60" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#a855f7" stop-opacity="0.45"/>
+              <stop offset="1" stop-color="#a855f7" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0 45 Q 25 25, 45 42 T 90 28 T 135 48 T 170 12 T 205 38 T 240 22 L 240 60 L 0 60 Z" fill="url(#purpleGrad)"/>
+          <path d="M0 45 Q 25 25, 45 42 T 90 28 T 135 48 T 170 12 T 205 38 T 240 22" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="170" cy="12" r="4.5" fill="#f43f5e" stroke="#ffffff" stroke-width="2" style="filter: drop-shadow(0 0 6px #f43f5e)"/>
+        </svg>
+      </div>
+
+      <!-- Card 2: Security Status -->
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-header">
+            <span class="kpi-title">Security Status</span>
+          </div>
+          <div class="kpi-big-num" style="color: #34d399;">High</div>
+          <div class="kpi-sub-text" style="margin-top: 4px;">Security Score</div>
+          <div style="font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 4px;">98/100</div>
+        </div>
+
+        <div style="margin-top: 18px;">
+          <div style="font-size: 26px; font-weight: 800; color: #f43f5e;">3</div>
+          <div style="font-size: 12px; color: #94a3b8;">Critical Incidents (<span style="color: #f43f5e; font-weight: 600;">1 Active</span>)</div>
         </div>
       </div>
 
-      <div class="cards-grid">
-        <!-- Card 1: API Usage -->
-        <div class="card">
-          <div class="card-title">API Usage</div>
-          <div class="card-value-large">2.1M <span class="trend">+14%</span> <span style="font-size: 18px; margin-left: auto;">5K</span></div>
-          <div class="card-sub"><span>Total Requests</span> <span>Avg Err/Min</span></div>
-          <div class="chart-area">
-            <svg width="100%" height="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="purple-grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="var(--accent-purple)" />
-                  <stop offset="100%" stop-color="transparent" />
-                </linearGradient>
-              </defs>
-              <path class="chart-gradient-fill" d="M0 40 L0 30 Q10 25, 20 28 T 40 20 T 60 30 T 80 5 T 90 20 L100 10 L100 40 Z" />
-              <path class="sparkline sparkline-purple" d="M0 30 Q10 25, 20 28 T 40 20 T 60 30 T 80 5 T 90 20 L100 10" />
-              <!-- Highlight dot -->
-              <line x1="80" y1="5" x2="80" y2="40" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
-              <circle cx="80" cy="5" r="2" fill="#fff" filter="drop-shadow(0 0 4px #fff)" />
-            </svg>
+      <!-- Card 3: Auth Status -->
+      <div class="kpi-card cyan-glow">
+        <div>
+          <div class="kpi-header">
+            <span class="kpi-title">Auth Status</span>
           </div>
-        </div>
-
-        <!-- Card 2: Security Status -->
-        <div class="card">
-          <div class="card-title">Security Status</div>
-          <div class="card-status-text text-green">High</div>
-          <div class="card-details">Security Score</div>
-          <div class="card-value-large" style="font-size: 20px;">98/100</div>
-          <div class="card-status-text text-red" style="margin-top: 16px; font-size: 18px;">3</div>
-          <div class="card-details">Critical Incidents <span class="text-red">(1 Active)</span></div>
-        </div>
-
-        <!-- Card 3: Auth Status -->
-        <div class="card">
-          <div class="card-title">Auth Status</div>
-          <div class="card-status-text text-blue">99.8%</div>
-          <div class="card-details">Success Rate</div>
-          <div class="card-status-text text-red" style="margin-top: 12px; font-size: 18px;">2.1k</div>
-          <div class="card-details">Fails</div>
-          <div style="font-size: 11px; color: var(--accent-green); margin-top: 8px;">Active Token Status</div>
-          
           <div class="donut-container">
-            <svg viewBox="0 0 36 36">
-              <path class="donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path class="donut-segment" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <div>
+              <div class="kpi-big-num" style="font-size: 26px;">99.8%</div>
+              <div class="kpi-sub-text">Success Rate</div>
+              <div style="font-size: 18px; font-weight: 700; color: #f43f5e; margin-top: 8px;">2.1k</div>
+              <div class="kpi-sub-text">Fails</div>
+            </div>
+
+            <!-- Cyan Glowing Donut Chart -->
+            <svg class="donut-svg" viewBox="0 0 36 36">
+              <path stroke="rgba(255,255,255,0.08)" stroke-width="4.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path stroke="#06b6d4" stroke-dasharray="90, 100" stroke-width="4.5" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" style="filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.8));"/>
             </svg>
           </div>
         </div>
 
-        <!-- Card 4: Traffic Latency -->
-        <div class="card">
-          <div class="card-title">Traffic Latency</div>
-          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
-            <span>Median</span><span>95th Pctl</span><span>Avg</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; margin-bottom: 12px;">
-            <span>45ms</span><span>88ms</span><span>52ms</span>
-          </div>
-          <div class="chart-area" style="height: 50px;">
-            <svg width="100%" height="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="blue-grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="var(--accent-blue)" />
-                  <stop offset="100%" stop-color="transparent" />
-                </linearGradient>
-              </defs>
-              <path class="chart-gradient-fill-blue" d="M0 40 L0 35 Q15 35, 30 25 T 50 35 T 70 15 T 90 25 L100 20 L100 40 Z" />
-              <path class="sparkline sparkline-blue" d="M0 35 Q15 35, 30 25 T 50 35 T 70 15 T 90 25 L100 20" />
-              <path class="sparkline sparkline-purple" d="M0 30 Q20 30, 40 20 T 60 25 T 80 10 T 90 15 L100 12" />
-            </svg>
-          </div>
+        <div class="token-active-badge">
+          <span class="pulse-dot"></span>
+          <span>Active Token Status</span>
         </div>
       </div>
 
-      <!-- Table -->
+      <!-- Card 4: Traffic Latency -->
+      <div class="kpi-card purple-glow">
+        <div>
+          <div class="kpi-header">
+            <span class="kpi-title">Traffic Latency</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px;">
+            <div>
+              <div class="kpi-sub-text">Median</div>
+              <div style="font-size: 18px; font-weight: 700; color: #ffffff;">45ms</div>
+            </div>
+            <div>
+              <div class="kpi-sub-text">95th Pctl</div>
+              <div style="font-size: 18px; font-weight: 700; color: #ffffff;">88ms</div>
+            </div>
+            <div>
+              <div class="kpi-sub-text">Avg</div>
+              <div style="font-size: 18px; font-weight: 700; color: #ffffff;">52ms</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dual Wave Chart (Cyan & Violet) -->
+        <svg class="sparkline-svg" viewBox="0 0 240 60" fill="none">
+          <path d="M0 40 Q 30 20, 60 38 T 120 18 T 180 35 T 240 15" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" style="filter: drop-shadow(0 0 4px #a855f7);"/>
+          <path d="M0 50 Q 35 32, 70 48 T 140 28 T 210 44 T 240 30" stroke="#06b6d4" stroke-width="2.2" stroke-linecap="round" style="filter: drop-shadow(0 0 4px #06b6d4);"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Bottom Endpoints Table Card Matching Mockup -->
+    <section class="endpoints-card">
+      <div class="endpoints-header">
+        <h2 class="endpoints-title">API Endpoints - Zero-Trust Metrics</h2>
+        <div class="search-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="endpointSearch" placeholder="Filter endpoints..." onkeyup="filterEndpoints()">
+        </div>
+      </div>
+
       <div class="table-container">
-        <div class="table-header">API Endpoints - Zero-Trust Metrics</div>
-        <table>
+        <table class="endpoints-table" id="endpointsTable">
           <thead>
             <tr>
               <th>Endpoint Path</th>
@@ -336,50 +776,207 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>/api/v1/billing/costs</td>
-              <td>billing/costs</td>
+            <tr onclick="inspectEndpoint('/api/v1/billing/costs')">
+              <td class="col-endpoint">/api/v1/billing/costs</td>
+              <td class="col-resource">billing/costs</td>
               <td>850k</td>
               <td>0.05%</td>
               <td>42ms</td>
               <td>0</td>
-              <td>Auth</td>
-              <td><span class="shield-icon">🛡️</span> <span class="status-icon">✓</span></td>
+              <td><span class="badge-auth">Auth</span></td>
+              <td>
+                <div class="status-icons">
+                  <svg class="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td>/api/v2/auth/token</td>
-              <td>auth/token</td>
+
+            <tr onclick="inspectEndpoint('/api/v2/auth/token')">
+              <td class="col-endpoint">/api/v2/auth/token</td>
+              <td class="col-resource">auth/token</td>
               <td>850k</td>
               <td>0.05%</td>
               <td>42ms</td>
               <td>0</td>
-              <td>Auth</td>
-              <td><span class="shield-icon">🛡️</span> <span class="status-icon">✓</span></td>
+              <td><span class="badge-auth">Auth</span></td>
+              <td>
+                <div class="status-icons">
+                  <svg class="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td>/api/v1/metrics/usage</td>
-              <td>metrics/usage</td>
+
+            <tr onclick="inspectEndpoint('/api/v1/metrics/usage')">
+              <td class="col-endpoint">/api/v1/metrics/usage</td>
+              <td class="col-resource">metrics/usage</td>
               <td>850k</td>
               <td>0.05%</td>
               <td>42ms</td>
               <td>0</td>
-              <td>Active</td>
-              <td><span class="shield-icon">🛡️</span> <span class="status-icon">✓</span></td>
+              <td><span class="badge-active">Active</span></td>
+              <td>
+                <div class="status-icons">
+                  <svg class="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td>/api/v2/users/active</td>
-              <td>users/active</td>
+
+            <tr onclick="inspectEndpoint('/api/v3/users/active')">
+              <td class="col-endpoint">/api/v3/users/active</td>
+              <td class="col-resource">users/active</td>
               <td>850k</td>
               <td>0.05%</td>
               <td>42ms</td>
               <td>0</td>
-              <td>Auth</td>
-              <td><span class="shield-icon">🛡️</span> <span class="status-icon">✓</span></td>
+              <td><span class="badge-auth">Auth</span></td>
+              <td>
+                <div class="status-icons">
+                  <svg class="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </td>
+            </tr>
+
+            <tr onclick="inspectEndpoint('/api/v1/finops/recommendations')">
+              <td class="col-endpoint">/api/v1/finops/recommendations</td>
+              <td class="col-resource">finops/waste</td>
+              <td>310k</td>
+              <td>0.01%</td>
+              <td>28ms</td>
+              <td>0</td>
+              <td><span class="badge-auth">Auth</span></td>
+              <td>
+                <div class="status-icons">
+                  <svg class="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </td>
+            </tr>
+
+            <tr onclick="inspectEndpoint('/api/v1/gateway/ratelimit')">
+              <td class="col-endpoint">/api/v1/gateway/ratelimit</td>
+              <td class="col-resource">ratelimit/token-bucket</td>
+              <td>1.2M</td>
+              <td>0.08%</td>
+              <td>12ms</td>
+              <td>1</td>
+              <td><span class="badge-active">Active</span></td>
+              <td>
+                <div class="status-icons">
+                  <svg class="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   </main>
+
+  <!-- Interactive Anomaly Scan Modal -->
+  <div class="scanner-modal-backdrop" id="scannerModal">
+    <div class="scanner-modal">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 18px; font-weight: 700; color: #ffffff;">Zero-Trust Real-Time Anomaly Scanner</h3>
+        <button onclick="closeScanner()" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+      <p style="font-size: 13px; color: #94a3b8; margin-top: 6px;">Deep inspection of ingress tokens, JWT validation latency, and FinOps waste signatures across edge clusters.</p>
+
+      <div class="scanner-progress-bar">
+        <div class="scanner-progress-fill" id="scannerFill"></div>
+      </div>
+
+      <div class="scanner-log" id="scannerLog">
+        <p>[0.00s] Initializing eBPF network probe...</p>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 20px; gap: 10px;">
+        <button onclick="closeScanner()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #ffffff; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching simulation
+    function switchTab(tab) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      if (tab === 'dashboard' || tab === 'apis') {
+        document.querySelector('.endpoints-title').textContent = 'API Endpoints - Zero-Trust Metrics';
+      } else if (tab === 'cost') {
+        document.querySelector('.endpoints-title').textContent = 'FinOps Cost Waste & Recommendations';
+      } else if (tab === 'anomalies') {
+        document.querySelector('.endpoints-title').textContent = 'Detected Spikes & Zero-Day Latency Outliers';
+      } else if (tab === 'reports') {
+        document.querySelector('.endpoints-title').textContent = 'Historical Infrastructure Compliance Reports';
+      }
+    }
+
+    // Period selection updates metrics
+    function updatePeriod(val) {
+      const usage = document.getElementById('statApiUsage');
+      const err = document.getElementById('statErrMin');
+      if (val === '24') {
+        usage.textContent = '84.2K';
+        err.innerHTML = '142 <span style="font-size: 12px; font-weight: 500; color: #94a3b8;">Err/Min</span>';
+      } else if (val === '7') {
+        usage.textContent = '540K';
+        err.innerHTML = '1.2K <span style="font-size: 12px; font-weight: 500; color: #94a3b8;">Err/Min</span>';
+      } else if (val === '30') {
+        usage.textContent = '2.1M';
+        err.innerHTML = '5K <span style="font-size: 12px; font-weight: 500; color: #94a3b8;">Err/Min</span>';
+      } else {
+        usage.textContent = '6.4M';
+        err.innerHTML = '14K <span style="font-size: 12px; font-weight: 500; color: #94a3b8;">Err/Min</span>';
+      }
+    }
+
+    // Live filtering
+    function filterEndpoints() {
+      const query = document.getElementById('endpointSearch').value.toLowerCase();
+      const rows = document.querySelectorAll('#endpointsTable tbody tr');
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        r.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
+    // Modal Anomaly Scanner
+    function openScanner() {
+      const modal = document.getElementById('scannerModal');
+      const fill = document.getElementById('scannerFill');
+      const log = document.getElementById('scannerLog');
+      modal.style.display = 'flex';
+      fill.style.width = '0%';
+      log.innerHTML = '<p>[0.00s] Initializing Zero-Trust telemetry stream...</p>';
+
+      const steps = [
+        { pct: 25, msg: '<p>[0.45s] Inspecting JWT signing certs & Keycloak OIDC tokens...</p>' },
+        { pct: 50, msg: '<p class="log-highlight">[0.90s] Evaluating ingress rate-limiting rules against 18,240 IPs...</p>' },
+        { pct: 75, msg: '<p>[1.30s] Running FinOps CPU/Memory idle threshold detection...</p>' },
+        { pct: 100, msg: '<p class="log-success">[1.85s] COMPLETE: Security Score 98/100. 0 high-risk anomalies detected.</p>' }
+      ];
+
+      steps.forEach((s, idx) => {
+        setTimeout(() => {
+          fill.style.width = s.pct + '%';
+          log.innerHTML += s.msg;
+          log.scrollTop = log.scrollHeight;
+        }, (idx + 1) * 450);
+      });
+    }
+
+    function closeScanner() {
+      document.getElementById('scannerModal').style.display = 'none';
+    }
+
+    function inspectEndpoint(path) {
+      alert('Endpoint Inspector: ' + path + '\n\n• Zero-Trust Policy: STRICT\n• Mutual TLS: ENFORCED\n• Average Response Time: 42ms\n• Rate Limit: 10,000 req/min (Token Bucket)\n• Status: HEALTHY');
+    }
+  </script>
 </body>
 </html>
