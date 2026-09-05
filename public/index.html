@@ -380,31 +380,95 @@ footer {
     <a class="btn ghost" href="#security-comparison">Pourquoi les CISOs nous choisissent</a>
   </div>
 
-  <!-- 3D Animated Interactive Interface Showcase -->
-  <div style="margin: 36px auto 28px; max-width: 900px; position: relative; perspective: 1000px;">
-    <div class="finops-3d-card">
-      <img src="winnow_banner.jpg" alt="Winnow FinOps 3D Interface Showcase" style="width: 100%; height: auto; display: block;" />
-      <div style="position: absolute; top: 16px; right: 16px; background: rgba(9, 13, 22, 0.9); border: 1px solid #10B981; color: #34D399; font-size: 12px; font-weight: 800; padding: 6px 14px; border-radius: 99px; backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);">
-        ⚡ -$14,160.00 / AN RÉCUPÉRABLES
+  <!-- 3D Animated Interactive Interface Showcase (Real FinOps Dashboard Mockup) -->
+  <div style="margin: 36px auto 28px; max-width: 960px; position: relative; perspective: 1000px;">
+    <div class="finops-3d-card" style="background: rgba(13, 17, 26, 0.95); backdrop-filter: blur(24px); border: 2px solid rgba(168, 85, 247, 0.4); border-radius: 20px; box-shadow: 0 0 60px rgba(168, 85, 247, 0.25); overflow: hidden; text-align: left; padding: 24px;">
+      <!-- Dashboard Top Mini Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="display: flex; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #EF4444; display: inline-block;"></span>
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #F59E0B; display: inline-block;"></span>
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+          </span>
+          <span style="font-size: 13px; font-weight: 700; color: #F8FAFC; margin-left: 8px;">Winnow FinOps Intelligence • Datadog Cloud Spend Live</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <span style="background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #C084FC; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px;">Zero-Credential Enclave</span>
+          <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34D399; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px;">● Audit Live</span>
+        </div>
       </div>
-      <div style="position: absolute; bottom: 16px; left: 16px; background: rgba(9, 13, 22, 0.95); border: 1px solid rgba(16, 185, 129, 0.3); color: #F8FAFC; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 99px; backdrop-filter: blur(10px);">
-        ⚡ Filtres d'ingestion Datadog automatisés
-      </div>
-    </div>
-  </div>
 
-  <!-- Live Demo Mockup -->
-  <div class="mockup" id="mockup">
-    <div class="mockup-head"><span>audit-démo · profil entreprise réel</span><span style="color:var(--accent)">● calcul terminé</span></div>
-    <div class="mockup-stats">
-      <div class="stat"><div class="v">$<span data-count="1638">1,638</span><span style="color:var(--text-tertiary)">–</span>$<span data-count="2542">2,542</span></div><div class="l">économies directes / mois</div></div>
-      <div class="stat"><div class="v"><span data-count="31">31</span>%</div><div class="l">du montant de la facture</div></div>
-      <div class="stat"><div class="v"><span data-count="6">6</span></div><div class="l">anomalies classées par impact</div></div>
+      <!-- 4 KPI Cards Matching Dashboard -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
+        <!-- Card 1 -->
+        <div style="background: rgba(16, 18, 29, 0.85); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+          <div style="font-size: 11.5px; color: #94A3B8; font-weight: 600;">Dépense Cloud / Mois</div>
+          <div style="font-size: 22px; font-weight: 800; color: #FFF; margin: 4px 0;">$18,450</div>
+          <div style="font-size: 10.5px; color: #C084FC; font-weight: 700;">+$2.1k vs M-1 (Hausse)</div>
+        </div>
+        <!-- Card 2 -->
+        <div style="background: rgba(16, 18, 29, 0.85); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 12px; padding: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+          <div style="font-size: 11.5px; color: #94A3B8; font-weight: 600;">Gaspillage Détecté</div>
+          <div style="font-size: 22px; font-weight: 800; color: #FB7185; margin: 4px 0;">-$3,820</div>
+          <div style="font-size: 10.5px; color: #34D399; font-weight: 700;">14 Fixes Immédiats</div>
+        </div>
+        <!-- Card 3 -->
+        <div style="background: rgba(16, 18, 29, 0.85); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 12px; padding: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+          <div style="font-size: 11.5px; color: #94A3B8; font-weight: 600;">Score d'Efficience</div>
+          <div style="font-size: 22px; font-weight: 800; color: #38BDF8; margin: 4px 0;">92.4%</div>
+          <div style="font-size: 10.5px; color: #34D399; font-weight: 700;">Élagage Automatisé</div>
+        </div>
+        <!-- Card 4 -->
+        <div style="background: rgba(16, 18, 29, 0.85); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+          <div style="font-size: 11.5px; color: #94A3B8; font-weight: 600;">Télémétrie Orpheline</div>
+          <div style="font-size: 22px; font-weight: 800; color: #FFF; margin: 4px 0;">4.2M</div>
+          <div style="font-size: 10.5px; color: #94A3B8;">1.8 TB Logs Inutiles</div>
+        </div>
+      </div>
+
+      <!-- Actionable Waste Recommendations Table Mockup -->
+      <div style="background: rgba(16, 18, 29, 0.9); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="font-size: 13px; font-weight: 700; color: #FFF;">Gisements de Réduction Détectés (Aperçu Live)</span>
+          <span style="font-size: 11px; color: #34D399; font-weight: 700; font-family: monospace;">TOTAL ÉCONOMIES: +$3,820.00 / MO</span>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); color: #64748B; text-align: left;">
+              <th style="padding: 8px 6px;">Ressource / Clé Télémétrie</th>
+              <th style="padding: 8px 6px;">Catégorie</th>
+              <th style="padding: 8px 6px;">Coût Actuel</th>
+              <th style="padding: 8px 6px;">Économie Réalisable</th>
+              <th style="padding: 8px 6px; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 10px 6px; font-family: monospace; color: #F1F5F9; font-weight: 600;">datadog.custom_metrics.user_click_legacy</td>
+              <td style="padding: 10px 6px;"><span style="background: rgba(168,85,247,0.15); color: #C084FC; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">Custom Metrics</span></td>
+              <td style="padding: 10px 6px; color: #94A3B8;">$1,240/mo</td>
+              <td style="padding: 10px 6px; color: #34D399; font-weight: 700; font-family: monospace;">+$1,240/mo</td>
+              <td style="padding: 10px 6px; text-align: right;"><span style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34D399; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">1-Click Prune</span></td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 10px 6px; font-family: monospace; color: #F1F5F9; font-weight: 600;">aws.cloudwatch.app_debug_log_group</td>
+              <td style="padding: 10px 6px;"><span style="background: rgba(56,189,248,0.15); color: #38BDF8; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">CloudWatch Logs</span></td>
+              <td style="padding: 10px 6px; color: #94A3B8;">$890/mo</td>
+              <td style="padding: 10px 6px; color: #34D399; font-weight: 700; font-family: monospace;">+$890/mo</td>
+              <td style="padding: 10px 6px; text-align: right;"><span style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34D399; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">Fix TTL (14j)</span></td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 6px; font-family: monospace; color: #F1F5F9; font-weight: 600;">kubernetes.node_pool.dev_worker_c5_4xl</td>
+              <td style="padding: 10px 6px;"><span style="background: rgba(245,158,11,0.15); color: #FBBF24; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">EKS Cluster</span></td>
+              <td style="padding: 10px 6px; color: #94A3B8;">$1,150/mo</td>
+              <td style="padding: 10px 6px; color: #34D399; font-weight: 700; font-family: monospace;">+$680/mo</td>
+              <td style="padding: 10px 6px; text-align: right;"><span style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34D399; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">Right-Size</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="mrow"><span class="dot" style="background:var(--sev-high)"></span><span class="t">Métriques personnalisées jamais requêtées</span><span class="m">$402–543/mo</span></div>
-    <div class="mrow"><span class="dot" style="background:var(--sev-high)"></span><span class="t">Index de logs « prod-main » sans filtres d'exclusion (30j)</span><span class="m">$330–518/mo</span></div>
-    <div class="mrow"><span class="dot" style="background:var(--sev-medium)"></span><span class="t">14 hôtes de staging monitorés 24h/24 7j/7</span><span class="m">$282–470/mo</span></div>
-    <div class="mrow"><span class="dot" style="background:var(--sev-low)"></span><span class="t">Spans APM indexées à 100% sans échantillonnage</span><span class="m">$138–241/mo</span></div>
   </div>
 </section>
 
